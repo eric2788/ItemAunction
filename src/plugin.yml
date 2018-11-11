@@ -1,8 +1,12 @@
-name: ItemDatabase
-main: com.ericlam.main.ItemDatabase
+name: ItemAuction
+main: com.ericlam.main.ItemAuction
 version: 1.0
 authors: [Eric Lam]
 api-version: 1.13
 commands:
-  itembase:
-    description: main command
+  twsell:
+    description: sell command
+  twbuy:
+    description: buy command
+  twget:
+    description: get pre remove items command

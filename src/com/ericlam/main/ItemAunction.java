@@ -1,13 +1,13 @@
 package com.ericlam.main;
 
 import com.ericlam.command.TwBuyExecutor;
+import com.ericlam.command.TwGetExecutor;
 import com.ericlam.command.TwSellExecutor;
 import com.ericlam.config.Config;
 import com.ericlam.listener.OnPlayerEvent;
 import com.ericlam.mysql.MySQLManager;
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -43,6 +43,7 @@ public class ItemAunction extends JavaPlugin {
 
         this.getCommand("twsell").setExecutor(new TwSellExecutor(this));
         this.getCommand("twbuy").setExecutor(new TwBuyExecutor(this));
+        this.getCommand("twget").setExecutor(new TwGetExecutor(this));
 
         this.getServer().getPluginManager().registerEvents(new OnPlayerEvent(),this);
 
