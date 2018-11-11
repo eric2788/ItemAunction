@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="server">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/HikariCP-3.2.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/commons-pool2-2.6.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/paperclip-411.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

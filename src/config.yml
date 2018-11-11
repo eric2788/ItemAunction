@@ -1,0 +1,26 @@
+#是否正式啟用此插件
+#由於sql一開始是默認資料，有機會資料錯誤
+enabled: false
+#最大金錢接受
+max-money: 200000000
+#伺服器ID辨認
+server: "default"
+#下架檢查間隔 (分鐘)
+check-interval: 60
+#多少天後轉移到下架資料庫
+expire-days: 30
+#轉移到下架資料庫後，多少天後再移除
+remove-days: 14
+MySQL:
+  host: 127.0.0.1
+  port: 3306
+  username: username
+  password: password
+  database: database
+  sell-table: ItemAuc
+  pre-remove-table: remove_ItemAuc
+  use-SSL: false
+  Pool:
+    name: Pool
+    min-size: 5
+    max-size: 10
