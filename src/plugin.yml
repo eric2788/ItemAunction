@@ -2,6 +2,7 @@ name: ItemAuction
 main: com.ericlam.main.ItemAuction
 version: 1.0
 authors: [Eric Lam]
+soft-depend: [Vault]
 api-version: 1.13
 commands:
   twsell:

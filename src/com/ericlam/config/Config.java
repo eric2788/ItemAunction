@@ -35,6 +35,8 @@ public class Config {
     public static String no_perm;
     public static String not_number;
     public static String max_number;
+    public static String no_money;
+    public static String money_not_same;
 
     public static boolean enable;
 
@@ -76,6 +78,8 @@ public class Config {
         no_perm = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("no-perm"));
         not_number = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("not-number"));
         max_number = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("max-number"));
+        no_money = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("no-money"));
+        money_not_same = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("money-not-same"));
 
         enable = config.getBoolean("enabled");
 

@@ -47,8 +47,26 @@ public class MarketManager {
         }
     }
 
-    public boolean uploadItem(ItemStack item, Player player, int price,String nameid){
+    private void oldPriceChecking(ItemStack item, Player player, int price) throws MoneyPriceException {
+        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `Money` FROM `"+Config.selltable+"` WHERE `Seller-Name`=? OR `Seller-UUID`=? AND `Seller-Server`=? AND `ItemStack`=?")){
+            statement.setString(1,player.getName());
+            statement.setString(2,player.getUniqueId().toString());
+            statement.setString(3,Config.server);
+            statement.setString(4,ItemStringConvert.itemStackToBase64(item));
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()){
+                if (resultSet.getInt("Money") != price){
+                    throw new MoneyPriceException(resultSet.getInt("Money")+"");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean uploadItem(ItemStack item, Player player, int price,String nameid) throws MoneyPriceException {
         if (hasItem(player,nameid)) return false;
+        oldPriceChecking(item, player, price);
         String base64 = ItemStringConvert.itemStackToBase64(item);
         int amount = item.getAmount();
         String itemname = item.getItemMeta().getDisplayName();
@@ -77,8 +95,9 @@ public class MarketManager {
            }
     }
 
-    public boolean uploadItem(ItemStack item, Player player, int price, String target, String targetserver, String nameid){
+    public boolean uploadItem(ItemStack item, Player player, int price, String target, String targetserver, String nameid) throws MoneyPriceException {
         if (hasItem(player,nameid)) return false;
+        oldPriceChecking(item, player, price);
         String base64 = ItemStringConvert.itemStackToBase64(item);
         int amount = item.getAmount();
         String itemname = item.getItemMeta().getDisplayName();
@@ -107,18 +126,26 @@ public class MarketManager {
             }
     }
 
-    public ItemStack[] getTradeItems(String PlayerName){
-        List<ItemStack> items = new ArrayList<>();
-        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `ItemStack`,`Item-Name` FROM `"+Config.selltable+"` WHERE `Trader-PlayerName`=? AND `Trader-Server`=?")){
+    public HashMap<ItemStack, Integer> getTradeItems(String PlayerName){
+        HashMap<ItemStack, Integer> itemsPrices = new HashMap<>();
+        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `Money`,`ItemStack`,`Item-Name` FROM `"+Config.selltable+"` WHERE `Trader-PlayerName`=? AND `Trader-Server`=?")){
             statement.setString(1,PlayerName);
             statement.setString(2,Config.server);
             ResultSet resultSet = statement.executeQuery();
-            PreRemoveManager.addItem(items, resultSet, plugin);
+            while (resultSet.next()){
+                ItemStack item = ItemStringConvert.itemStackFromBase64(resultSet.getString("ItemStack"));
+                int price = resultSet.getInt("Money");
+                if (item == null){
+                    plugin.getServer().getLogger().info("警告: 物品 \""+resultSet.getString("Item-Name")+"\" 已損壞，無法使用。");
+                    continue;
+                }
+                itemsPrices.put(item,price);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
 
         }
-        return items.toArray(new ItemStack[0]);
+        return itemsPrices;
     }
 
     public ItemStack getBackItem(Player player,String nameid){
@@ -192,5 +219,20 @@ public class MarketManager {
                 }
             }
         }.runTaskTimerAsynchronously(plugin,0L,100L);
+    }
+
+    public int getPrice(ItemStack item,Player player){
+        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `Money` FROM `"+Config.selltable+"` WHERE `Trader-PlayerName`=? AND `Trader-Server`=? AND `ItemStack`=?")){
+            statement.setString(1,player.getName());
+            statement.setString(2,Config.server);
+            statement.setString(3,ItemStringConvert.itemStackToBase64(item));
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()){
+                return resultSet.getInt("Money");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 }

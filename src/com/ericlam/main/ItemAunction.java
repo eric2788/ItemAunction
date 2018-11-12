@@ -5,10 +5,15 @@ import com.ericlam.command.TwGetExecutor;
 import com.ericlam.command.TwSellExecutor;
 import com.ericlam.config.Config;
 import com.ericlam.listener.OnPlayerEvent;
+import com.ericlam.mysql.MarketManager;
 import com.ericlam.mysql.MySQLManager;
+import com.ericlam.mysql.PreRemoveManager;
+import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.PreparedStatement;
@@ -16,6 +21,7 @@ import java.sql.SQLException;
 
 public class ItemAunction extends JavaPlugin {
     public static Plugin plugin;
+    public static Economy economy;
 
     @Override
     public void onEnable() {
@@ -26,6 +32,15 @@ public class ItemAunction extends JavaPlugin {
 
         if (!Config.enable){
             console.sendMessage(ChatColor.RED + "由於你尚未在 config.yml 把 enabled 改成 true, 因此本插件並不會啟用。");
+            return;
+        }
+
+        if (this.getServer().getPluginManager().isPluginEnabled("Vault")){
+            RegisteredServiceProvider<Economy> rsp = plugin.getServer().getServicesManager().getRegistration(Economy.class);
+            economy = rsp.getProvider();
+        }else{
+            console.sendMessage(ChatColor.RED+" 找不到Vault插件! 因此本插件並不會啟用。");
+            Config.enable = false;
             return;
         }
 
@@ -73,7 +88,19 @@ public class ItemAunction extends JavaPlugin {
             preRemoveTable.execute();
         } catch (SQLException e) {
             e.printStackTrace();
+            Config.enable = false;
+            return;
         }
+
+        console.sendMessage(ChatColor.GREEN+"拍賣插件已啟用。");
+        console.sendMessage(ChatColor.AQUA+"作者: Eric Lam");
+
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this,()->{
+
+            MarketManager.getInstance().updateTimeStamp();
+            PreRemoveManager.getInstance().updateTimeStamp();
+
+        },100L,Config.getInstance().getConfig().getInt("check-interval") * 60 * 20L);
     }
 
     @Override

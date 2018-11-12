@@ -38,23 +38,19 @@ public class PreRemoveManager {
             statement.setString(1,PlayerName);
             statement.setString(2,Config.server);
             ResultSet resultSet = statement.executeQuery();
-            addItem(items, resultSet, plugin);
+            while (resultSet.next()){
+                ItemStack item = ItemStringConvert.itemStackFromBase64(resultSet.getString("ItemStack"));
+                if (item == null){
+                    plugin.getServer().getLogger().info("警告: 物品 \""+resultSet.getString("Item-Name")+"\" 已損壞，無法使用。");
+                    continue;
+                }
+                items.add(item);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
 
         }
         return items.toArray(new ItemStack[0]);
-    }
-
-    static void addItem(List<ItemStack> items, ResultSet resultSet, Plugin plugin) throws SQLException {
-        while (resultSet.next()){
-            ItemStack item = ItemStringConvert.itemStackFromBase64(resultSet.getString("ItemStack"));
-            if (item == null){
-                plugin.getServer().getLogger().info("警告: 物品 \""+resultSet.getString("Item-Name")+"\" 已損壞，無法使用。");
-                continue;
-            }
-            items.add(item);
-        }
     }
 
     public void updateTimeStamp(){
