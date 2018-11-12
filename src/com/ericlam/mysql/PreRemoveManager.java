@@ -1,17 +1,16 @@
 package com.ericlam.mysql;
 
 import com.ericlam.config.Config;
+import com.ericlam.converter.ItemStringConvert;
 import com.ericlam.main.ItemAunction;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.sql.*;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
@@ -32,6 +31,31 @@ public class PreRemoveManager {
     }
 
     private HashMap<OfflinePlayer, List<ItemStack>> playerItems = new HashMap<>();
+
+    public ItemStack[] getTradeItems(String PlayerName){
+        List<ItemStack> items = new ArrayList<>();
+        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `ItemStack`,`Item-Name` FROM `"+Config.pre_remove_table+"` WHERE `Owner-PlayerName`=? AND `Owner-Server`=?")){
+            statement.setString(1,PlayerName);
+            statement.setString(2,Config.server);
+            ResultSet resultSet = statement.executeQuery();
+            addItem(items, resultSet, plugin);
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+        }
+        return items.toArray(new ItemStack[0]);
+    }
+
+    static void addItem(List<ItemStack> items, ResultSet resultSet, Plugin plugin) throws SQLException {
+        while (resultSet.next()){
+            ItemStack item = ItemStringConvert.itemStackFromBase64(resultSet.getString("ItemStack"));
+            if (item == null){
+                plugin.getServer().getLogger().info("警告: 物品 \""+resultSet.getString("Item-Name")+"\" 已損壞，無法使用。");
+                continue;
+            }
+            items.add(item);
+        }
+    }
 
     public void updateTimeStamp(){
             HashSet<OfflinePlayer> players = new HashSet<>(Arrays.asList(Bukkit.getOfflinePlayers()));

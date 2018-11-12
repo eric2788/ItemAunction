@@ -107,25 +107,18 @@ public class MarketManager {
             }
     }
 
-    public List<ItemStack> getTradeItems(String PlayerName){
+    public ItemStack[] getTradeItems(String PlayerName){
         List<ItemStack> items = new ArrayList<>();
         try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `ItemStack`,`Item-Name` FROM `"+Config.selltable+"` WHERE `Trader-PlayerName`=? AND `Trader-Server`=?")){
             statement.setString(1,PlayerName);
             statement.setString(2,Config.server);
             ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()){
-                ItemStack item = ItemStringConvert.itemStackFromBase64(resultSet.getString("ItemStack"));
-                if (item == null){
-                    plugin.getServer().getLogger().info("警告: 物品 \""+resultSet.getString("Item-Name")+"\" 已損壞，無法使用。");
-                    continue;
-                }
-                items.add(item);
-            }
+            PreRemoveManager.addItem(items, resultSet, plugin);
         } catch (SQLException e) {
             e.printStackTrace();
 
         }
-        return items;
+        return items.toArray(new ItemStack[0]);
     }
 
     public ItemStack getBackItem(Player player,String nameid){

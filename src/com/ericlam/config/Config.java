@@ -12,6 +12,7 @@ public class Config {
     private static Config manager;
     private final FileConfiguration config;
     private final FileConfiguration msg;
+    private final FileConfiguration inventory;
 
     public static String selltable;
     public static String pre_remove_table;
@@ -46,9 +47,13 @@ public class Config {
         if (!configFile.exists()) plugin.saveResource("config.yml", true);
         File msgFile = new File(plugin.getDataFolder(),"lang.yml");
         if (!msgFile.exists()) plugin.saveResource("lang.yml", true);
+        File inventoryFile = new File(plugin.getDataFolder(),"inventory.yml");
+        if (!inventoryFile.exists()) plugin.saveResource("inventory.yml",true);
 
         config = YamlConfiguration.loadConfiguration(configFile);
         msg = YamlConfiguration.loadConfiguration(msgFile);
+        inventory = YamlConfiguration.loadConfiguration(inventoryFile);
+
         selltable = config.getString("MySQL.sell-table");
         pre_remove_table = config.getString("MySQL.pre-remove-table");
 
@@ -89,5 +94,9 @@ public class Config {
 
     public FileConfiguration getMsg(){
         return msg;
+    }
+
+    public FileConfiguration getInventory() {
+        return inventory;
     }
 }
