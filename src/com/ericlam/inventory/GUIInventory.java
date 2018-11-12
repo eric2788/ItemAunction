@@ -59,9 +59,9 @@ public class GUIInventory {
         List<String> extralore = inventory == buyInventory ? gui.getStringList("buy-inventory.extra-lore") : gui.getStringList("pre-remove-inventory.extra-lore");
         List<String> lore = item.getLore();
         int extralength = extralore.size();
-        for (int i = extralength; i > 0; i--) {
-            assert lore != null;
-            lore.remove(lore.size());
+        int lorelength = lore.size();
+        if (lorelength >= lorelength - extralength + 1) {
+            lore.subList(lorelength - extralength + 1, lorelength + 1).clear();
         }
     }
 }
