@@ -26,12 +26,9 @@ public class Config {
     public static String upload_fail;
     public static String take_success;
     public static String take_fail;
-    public static String give_join;
-    public static String already_transfer;
     public static String no_exist;
     public static String full_inv;
     public static String list;
-    public static String trade_tag;
     public static String no_perm;
     public static String not_number;
     public static String max_number;
@@ -69,12 +66,9 @@ public class Config {
         upload_fail = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("upload-fail"));
         take_success = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("take-success"));
         take_fail = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("take-fail"));
-        give_join = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("give-join"));
-        already_transfer = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("already-transfer"));
         no_exist = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("no-exist"));
         full_inv = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("full-inv"));
         list = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("list"));
-        trade_tag = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("trade-tag"));
         no_perm = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("no-perm"));
         not_number = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("not-number"));
         max_number = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("max-number"));

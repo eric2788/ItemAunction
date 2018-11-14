@@ -38,10 +38,10 @@ public class OnPlayerEvent implements Listener {
             ItemStack[] removeItems = remove.getTradeItems(player.getName());
             Bukkit.getScheduler().runTask(plugin,()->{
                 if (playerItemsList.get(player).size() > 0){
-                    gui.addItemsToGUI(playerItemsList.get(player),gui.takeGUI(player).getBuy());
+                    gui.addItemsToGUI(playerItemsList.get(player),player);
                 }
                 if (removeItems.length > 0){
-                    gui.addItemsToGUI(removeItems,gui.takeGUI(player).getRemove());
+                    gui.addItemsToGUI(removeItems,player);
                 }
             });
         });

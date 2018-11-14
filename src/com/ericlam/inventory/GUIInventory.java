@@ -12,6 +12,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
 import java.sql.PreparedStatement;
@@ -23,6 +24,8 @@ import java.util.stream.Collectors;
 public class GUIInventory {
     private HashMap<Player, Inventories> playerInv = new HashMap<>();
     private FileConfiguration gui;
+    private ItemStack previousPage;
+    private ItemStack nextPage;
     private Inventory buyInventory;
     private Inventory preRemoveInventory;
     private Plugin plugin;
@@ -37,8 +40,22 @@ public class GUIInventory {
     private GUIInventory(){
         plugin = ItemAunction.plugin;
         gui = Config.getInstance().getInventory();
+        ItemStack previous = new ItemStack(Material.valueOf(gui.getString("item-material")));
+        ItemStack next = previous.clone();
+        ItemMeta previousMeta = previous.getItemMeta();
+        ItemMeta nextMeta = next.getItemMeta();
+        previousMeta.setDisplayName(gui.getString("item-previous").replace('&','§'));
+        nextMeta.setDisplayName(gui.getString("item-next").replace('&','§'));
+        previous.setItemMeta(previousMeta);
+        next.setItemMeta(nextMeta);
+        previousPage = previous;
+        nextPage = next;
         buyInventory = Bukkit.createInventory(null,54,gui.getString("buy-inventory.title").replace('&','§'));
+        buyInventory.setItem(45,previous);
+        buyInventory.setItem(53,next);
         preRemoveInventory = Bukkit.createInventory(null,54,gui.getString("pre-remove-inventory.title").replace('&','§'));
+        preRemoveInventory.setItem(45,previous);
+        preRemoveInventory.setItem(53,next);
     }
 
     public void makeGUI(Player player){
@@ -51,27 +68,44 @@ public class GUIInventory {
         return playerInv.get(player);
     }
 
-    public void addItemsToGUI(ItemStack[] items,Inventory inventory){
-        for (ItemStack item : items) {
+    public void addItemsToGUI(ItemStack[] items,Player player){
+        List<Inventory> remove = takeGUI(player).getRemove();
+        int page = 0;
+        for (int i = 0; i < items.length;i++) {
+            ItemStack item = items[i];
             List<String> extralore = gui.getStringList("pre-remove-inventory.extra-lore");
             List<String> lore = item.getItemMeta().getLore();
             lore.addAll(extralore);
             item.setLore(lore);
+            if (i % 45 == 0){
+                remove.add(preRemoveInventory);
+                page++;
+            }
+            remove.get(page).addItem(item);
         }
-        inventory.addItem(items);
+        takeGUI(player).setRemove(remove);
     }
 
-    public void addItemsToGUI(HashMap<ItemStack, Integer> items,Inventory inventory){
+    public void addItemsToGUI(HashMap<ItemStack, Integer> items,Player player){
+        List<Inventory> buy = takeGUI(player).getBuy();
+        int i = 0;
+        int page = 0;
         for (ItemStack item : items.keySet()) {
             List<String> extralore = gui.getStringList("buy-inventory.extra-lore").stream().map(text -> text.replace("<money>", items.get(item)+"")).collect(Collectors.toList());
             List<String> lore = item.getItemMeta().getLore();
             lore.addAll(extralore);
             item.setLore(lore);
+            if (i % 45 == 0){
+                buy.add(buyInventory);
+                page++;
+            }
+            buy.get(page).addItem(item);
+            i++;
         }
-        items.forEach(inventory::addItem);
+        takeGUI(player).setBuy(buy);
     }
 
-    public boolean buyItem(ItemStack item, Player player,int price){
+    public boolean buyItem(ItemStack item, Player player,int price,Inventory invbuy){
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(player.getUniqueId());
         if (ItemAunction.economy.getBalance(offlinePlayer) < price) {
             player.sendMessage(Config.no_money);
@@ -108,14 +142,13 @@ public class GUIInventory {
         }
         item.setLore(lore);
         player.getInventory().addItem(item);
-        Inventory invbuy = takeGUI(player).getBuy();
         invbuy.removeItem(item);
-        updateInventorySlot(invbuy);
-        takeGUI(player).setBuy(invbuy);
+        takeGUI(player).getBuy().forEach(this::updateInventorySlot);
+        clearEmptyInventory(takeGUI(player).getBuy());
         return true;
     }
 
-    public boolean removeItem(ItemStack item,Player player){
+    public boolean removeItem(ItemStack item,Player player,Inventory invremove){
 
         List<String> extralore = gui.getStringList("pre-remove-inventory.extra-lore");
         List<String> lore = item.getItemMeta().getLore();
@@ -146,10 +179,9 @@ public class GUIInventory {
 
         item.setLore(lore);
         player.getInventory().addItem(item);
-        Inventory invremove = takeGUI(player).getRemove();
         invremove.removeItem(item);
-        updateInventorySlot(invremove);
-        takeGUI(player).setRemove(invremove);
+        takeGUI(player).getRemove().forEach(this::updateInventorySlot);
+        clearEmptyInventory(takeGUI(player).getRemove());
         return true;
     }
 
@@ -169,6 +201,16 @@ public class GUIInventory {
         for (ItemStack item : items) {
             inventory.setItem(i,item);
             i++;
+        }
+    }
+
+    private void clearEmptyInventory(List<Inventory> inventories){
+        for (Inventory inventory : inventories) {
+            boolean empty = true;
+            for (ItemStack content : inventory.getContents()) {
+                if (content!=null) empty = false;
+            }
+            if (empty) inventories.remove(inventory);
         }
     }
 }
