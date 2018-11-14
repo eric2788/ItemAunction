@@ -29,11 +29,18 @@ public class Config {
     public static String no_exist;
     public static String full_inv;
     public static String list;
+    public static String list_item;
+    public static String[] list_remind;
     public static String no_perm;
     public static String not_number;
     public static String max_number;
     public static String no_money;
     public static String money_not_same;
+    public static String no_next;
+    public static String no_previous;
+    public static String wait;
+    public static String list_page;
+    public static String no_this_page;
 
     public static boolean enable;
 
@@ -69,11 +76,18 @@ public class Config {
         no_exist = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("no-exist"));
         full_inv = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("full-inv"));
         list = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("list"));
+        list_item = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("list-item"));
+        list_remind = msg.getStringList("list-remind").stream().map(remind -> ChatColor.translateAlternateColorCodes('&',prefix+remind)).toArray(String[]::new);
         no_perm = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("no-perm"));
         not_number = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("not-number"));
         max_number = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("max-number"));
         no_money = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("no-money"));
         money_not_same = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("money-not-same"));
+        no_next = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("no-next"));
+        no_previous = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("no-previous"));
+        wait = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("wait"));
+        list_page = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("list-page"));
+        no_this_page = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("no-this-page"));
 
         enable = config.getBoolean("enabled");
 

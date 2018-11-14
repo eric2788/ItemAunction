@@ -23,11 +23,14 @@ import java.util.stream.Collectors;
 
 public class GUIInventory {
     private HashMap<Player, Inventories> playerInv = new HashMap<>();
+    private HashMap<Player, HashMap<ItemStack,Integer>> playerItemsList = new HashMap<>();
+    private HashMap<Player, ItemStack[]> playerItems = new HashMap<>();
+    private HashMap<Player, Boolean> changed = new HashMap<>();
     private FileConfiguration gui;
-    private ItemStack previousPage;
-    private ItemStack nextPage;
     private Inventory buyInventory;
     private Inventory preRemoveInventory;
+    private ItemStack previous;
+    private ItemStack next;
     private Plugin plugin;
 
     private static GUIInventory instance;
@@ -37,6 +40,38 @@ public class GUIInventory {
         return instance;
     }
 
+    public HashMap<Player, Boolean> getChanged() {
+        return changed;
+    }
+
+    public HashMap<ItemStack, Integer> getBuyItems(Player player) {
+        return playerItemsList.get(player);
+    }
+
+    public ItemStack[] getRemoveItems(Player player) {
+        return playerItems.get(player);
+    }
+
+    public void setPlayerItemsList(Player player, HashMap<ItemStack, Integer> map){
+        if (map.size() == playerItemsList.get(player).size()) return;
+        playerItemsList.put(player,map);
+        changed.put(player,true);
+    }
+
+    public void setPlayerItems(Player player,ItemStack[] item){
+        if (item.length == playerItems.get(player).length) return;
+        playerItems.put(player,item);
+        changed.put(player,true);
+    }
+
+    public ItemStack getNext() {
+        return next;
+    }
+
+    public ItemStack getPrevious() {
+        return previous;
+    }
+
     private GUIInventory(){
         plugin = ItemAunction.plugin;
         gui = Config.getInstance().getInventory();
@@ -44,12 +79,12 @@ public class GUIInventory {
         ItemStack next = previous.clone();
         ItemMeta previousMeta = previous.getItemMeta();
         ItemMeta nextMeta = next.getItemMeta();
-        previousMeta.setDisplayName(gui.getString("item-previous").replace('&','§'));
-        nextMeta.setDisplayName(gui.getString("item-next").replace('&','§'));
+        previousMeta.setDisplayName("§1§2§3§4§5§6§7§8§9"+gui.getString("item-previous").replace('&','§'));
+        nextMeta.setDisplayName("§1§2§3§4§5§6§7§8§9"+gui.getString("item-next").replace('&','§'));
         previous.setItemMeta(previousMeta);
         next.setItemMeta(nextMeta);
-        previousPage = previous;
-        nextPage = next;
+        this.previous = previous;
+        this.next = next;
         buyInventory = Bukkit.createInventory(null,54,gui.getString("buy-inventory.title").replace('&','§'));
         buyInventory.setItem(45,previous);
         buyInventory.setItem(53,next);
@@ -64,11 +99,30 @@ public class GUIInventory {
         }
     }
 
+    public int findPage(Inventory inventory,Player player,boolean isbuy){
+        if (!takeGUI(player).getBuy().contains(inventory) && !takeGUI(player).getRemove().contains(inventory)) return 0;
+        int page = 0;
+        if (isbuy){
+            for (Inventory inv : takeGUI(player).getBuy()) {
+                if (inv.equals(inventory)) return page;
+                page++;
+            }
+        }else{
+            for (Inventory inv : takeGUI(player).getRemove()) {
+                if (inv.equals(inventory)) return page;
+                page++;
+            }
+        }
+        return 0;
+    }
+
     public Inventories takeGUI(Player player){
         return playerInv.get(player);
     }
 
-    public void addItemsToGUI(ItemStack[] items,Player player){
+    public void addRemoveItemsToGUI(Player player){
+        playerInv.put(player, new Inventories(buyInventory,preRemoveInventory));
+        ItemStack[] items = getRemoveItems(player);
         List<Inventory> remove = takeGUI(player).getRemove();
         int page = 0;
         for (int i = 0; i < items.length;i++) {
@@ -86,7 +140,9 @@ public class GUIInventory {
         takeGUI(player).setRemove(remove);
     }
 
-    public void addItemsToGUI(HashMap<ItemStack, Integer> items,Player player){
+    public void addBuyItemsToGUI(Player player){
+        playerInv.put(player, new Inventories(buyInventory,preRemoveInventory));
+        HashMap<ItemStack, Integer> items = getBuyItems(player);
         List<Inventory> buy = takeGUI(player).getBuy();
         int i = 0;
         int page = 0;
@@ -143,8 +199,6 @@ public class GUIInventory {
         item.setLore(lore);
         player.getInventory().addItem(item);
         invbuy.removeItem(item);
-        takeGUI(player).getBuy().forEach(this::updateInventorySlot);
-        clearEmptyInventory(takeGUI(player).getBuy());
         return true;
     }
 
@@ -180,37 +234,13 @@ public class GUIInventory {
         item.setLore(lore);
         player.getInventory().addItem(item);
         invremove.removeItem(item);
-        takeGUI(player).getRemove().forEach(this::updateInventorySlot);
-        clearEmptyInventory(takeGUI(player).getRemove());
         return true;
     }
 
-    private boolean checkInventoryFull(Player player){
+    public boolean checkInventoryFull(Player player){
         for (ItemStack stack : player.getInventory().getContents()) {
             if (stack.getType() == Material.AIR) return false;
         }
         return true;
-    }
-
-    private void updateInventorySlot(Inventory inventory){
-        ItemStack[] items = inventory.getContents();
-        int empty = inventory.firstEmpty();
-        if (empty <= -1) return;
-        int i = 0;
-        inventory.removeItem(items);
-        for (ItemStack item : items) {
-            inventory.setItem(i,item);
-            i++;
-        }
-    }
-
-    private void clearEmptyInventory(List<Inventory> inventories){
-        for (Inventory inventory : inventories) {
-            boolean empty = true;
-            for (ItemStack content : inventory.getContents()) {
-                if (content!=null) empty = false;
-            }
-            if (empty) inventories.remove(inventory);
-        }
     }
 }

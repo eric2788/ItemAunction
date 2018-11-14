@@ -28,7 +28,11 @@ public class TwBuyExecutor implements CommandExecutor {
         Player player = (Player) commandSender;
         GUIInventory gui = GUIInventory.getInstance();
 
-        player.openInventory(gui.takeGUI(player).getBuy());
+        if (gui.takeGUI(player).getBuy().get(0) == null){
+            player.sendMessage(Config.wait);
+            return false;
+        }
+        player.openInventory(gui.takeGUI(player).getBuy().get(0));
 
         return true;
     }

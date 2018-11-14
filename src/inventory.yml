@@ -1,0 +1,13 @@
+item-material: ARROW
+item-previous: "&e previous page"
+item-next: "&e next page"
+buy-inventory:
+  title: "buylist"
+  extra-lore:
+    - "&7&l============="
+    - "&e$ <money>"
+pre-remove-inventory:
+  title: "removelist"
+  extra-lore:
+    - "&7&l==============="
+    - "Click item to get back"

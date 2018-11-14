@@ -2,6 +2,7 @@ package com.ericlam.mysql;
 
 import com.ericlam.config.Config;
 import com.ericlam.converter.ItemStringConvert;
+import com.ericlam.inventory.ItemData;
 import com.ericlam.main.ItemAunction;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -32,6 +33,29 @@ public class MarketManager {
     private MarketManager(){
         plugin = ItemAunction.plugin;
         config = Config.getInstance().getConfig();
+    }
+
+    public LinkedHashMap<String, ItemData> listItems(Player player){
+        LinkedHashMap<String,ItemData> map = new LinkedHashMap<>();
+        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `ItemStack`,`NameID`,`Money`,`TimeStamp` FROM `"+Config.selltable+"` WHERE `Seller-Name`=? OR `Seller-UUID`=? AND `Seller-Server`=? ORDER BY `NameID`")){
+            statement.setString(1,player.getName());
+            statement.setString(2,player.getUniqueId().toString());
+            statement.setString(3,Config.server);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()){
+                ItemStack item = ItemStringConvert.itemStackFromBase64(resultSet.getString("ItemStack"));
+                int money = resultSet.getInt("Money");
+                long time = resultSet.getInt("TimeStamp");
+                if (item == null){
+                    plugin.getServer().getLogger().info("警告: 物品 \""+resultSet.getString("Item-Name")+"\" 已損壞，無法使用。");
+                    continue;
+                }
+                map.put(resultSet.getString("NameID"),new ItemData(item,money,time));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return map;
     }
 
     public boolean hasItem(Player player,String nameid){
