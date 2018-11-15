@@ -164,7 +164,7 @@ public class GUIInventory {
     public boolean buyItem(ItemStack item, Player player,int price,Inventory invbuy){
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(player.getUniqueId());
         if (ItemAunction.economy.getBalance(offlinePlayer) < price) {
-            player.sendMessage(Config.no_money);
+            Bukkit.getScheduler().runTask(plugin,()->player.sendMessage(Config.no_money));
             return false;
         }
         List<String> extralore = gui.getStringList("buy-inventory.extra-lore");
@@ -174,12 +174,12 @@ public class GUIInventory {
 
 
         if (checkInventoryFull(player)) {
-            player.sendMessage(Config.full_inv);
+            Bukkit.getScheduler().runTask(plugin,()->player.sendMessage(Config.full_inv));
             return false;
         }
 
         if (ItemAunction.economy.withdrawPlayer(offlinePlayer,price).type != EconomyResponse.ResponseType.SUCCESS){
-            player.sendMessage(Config.no_money);
+            Bukkit.getScheduler().runTask(plugin,()->player.sendMessage(Config.no_money));
             return false;
         }
 
@@ -196,9 +196,12 @@ public class GUIInventory {
         if (lorelength >= lorelength - extralength + 1) {
             lore.subList(lorelength - extralength + 1, lorelength + 1).clear();
         }
-        item.setLore(lore);
-        player.getInventory().addItem(item);
-        invbuy.removeItem(item);
+
+        Bukkit.getScheduler().runTask(plugin,()->{
+            item.setLore(lore);
+            player.getInventory().addItem(item);
+            invbuy.removeItem(item);
+        });
         return true;
     }
 
@@ -211,7 +214,7 @@ public class GUIInventory {
 
 
         if (checkInventoryFull(player)) {
-            player.sendMessage(Config.full_inv);
+            Bukkit.getScheduler().runTask(plugin,()->player.sendMessage(Config.full_inv));
             return false;
         }
 
@@ -230,10 +233,11 @@ public class GUIInventory {
         if (lorelength >= lorelength - extralength + 1) {
             lore.subList(lorelength - extralength + 1, lorelength + 1).clear();
         }
-
-        item.setLore(lore);
-        player.getInventory().addItem(item);
-        invremove.removeItem(item);
+        Bukkit.getScheduler().runTask(plugin,()->{
+            item.setLore(lore);
+            player.getInventory().addItem(item);
+            invremove.removeItem(item);
+        });
         return true;
     }
 

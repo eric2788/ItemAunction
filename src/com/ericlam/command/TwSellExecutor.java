@@ -66,7 +66,10 @@ public class TwSellExecutor implements CommandExecutor {
                 try {
                     if (market.hasItem(player, itemname)) {
                         boolean success = market.uploadItem(item, player, money, itemname);
-                        Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(success ? Config.upload_success : Config.upload_fail));
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+                            player.sendMessage(success ? Config.upload_success : Config.upload_fail);
+                            if (success) player.getInventory().remove(item);
+                        });
                     } else {
                         Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(Config.exist));
                     }
@@ -94,7 +97,10 @@ public class TwSellExecutor implements CommandExecutor {
             try {
                 if (market.hasItem(player, itemname)) {
                     boolean success = market.uploadItem(item, player, money, name, server, itemname);
-                    Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(success ? Config.upload_success : Config.upload_fail));
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        player.sendMessage(success ? Config.upload_success : Config.upload_fail);
+                        if (success) player.getInventory().remove(item);
+                    });
                 } else {
                     Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(Config.exist));
                 }

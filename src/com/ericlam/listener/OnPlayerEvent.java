@@ -87,7 +87,10 @@ public class OnPlayerEvent implements Listener {
                 else player.sendMessage(Config.no_previous);
                 return;
             }
-            player.sendMessage(gui.buyItem(itemStack,player,gui.getBuyItems(player).get(itemStack),inventory) ? Config.take_success : Config.take_fail);
+            Bukkit.getScheduler().runTaskAsynchronously(plugin,()->{
+                boolean sucess = gui.buyItem(itemStack,player,gui.getBuyItems(player).get(itemStack),inventory);
+                Bukkit.getScheduler().runTask(plugin,()->player.sendMessage(sucess ? Config.take_success : Config.take_fail));
+            });
             e.setCancelled(true);
         }
 
@@ -111,7 +114,10 @@ public class OnPlayerEvent implements Listener {
                 else player.sendMessage(Config.no_previous);
                 return;
             }
-            player.sendMessage(gui.removeItem(itemStack,player,inventory) ? Config.take_success : Config.take_fail);
+            Bukkit.getScheduler().runTaskAsynchronously(plugin,()->{
+                boolean success = gui.removeItem(itemStack,player,inventory);
+                Bukkit.getScheduler().runTask(plugin,()->player.sendMessage(success ? Config.take_success : Config.take_fail));
+            });
             e.setCancelled(true);
         }
     }
