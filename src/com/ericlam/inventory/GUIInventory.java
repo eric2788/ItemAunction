@@ -131,7 +131,7 @@ public class GUIInventory {
             List<String> lore = item.getItemMeta().getLore();
             lore.addAll(extralore);
             item.setLore(lore);
-            if (i % 45 == 0){
+            if (i % 45 == 0 && i > 0){
                 remove.add(preRemoveInventory);
                 page++;
             }
@@ -151,7 +151,7 @@ public class GUIInventory {
             List<String> lore = item.getItemMeta().getLore();
             lore.addAll(extralore);
             item.setLore(lore);
-            if (i % 45 == 0){
+            if (i % 45 == 0 && i > 0){
                 buy.add(buyInventory);
                 page++;
             }

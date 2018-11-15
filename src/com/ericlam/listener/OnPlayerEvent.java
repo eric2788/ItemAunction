@@ -144,10 +144,10 @@ public class OnPlayerEvent implements Listener {
         ItemMeta pageMeta = pageitem.getItemMeta();
         if (gui.takeGUI(player).getBuy().contains(inventory)){
             int page = gui.findPage(inventory,player,true);
-            pageMeta.setDisplayName("§f頁 "+page+" / "+gui.takeGUI(player).getBuy().size());
+            pageMeta.setDisplayName("§1§2§3§4§5§f頁 "+ ++page+" / "+gui.takeGUI(player).getBuy().size());
         }else if (gui.takeGUI(player).getRemove().contains(inventory)){
-            int page = gui.findPage(inventory,player,true);
-            pageMeta.setDisplayName("§f頁 "+page+" / "+gui.takeGUI(player).getRemove().size());
+            int page = gui.findPage(inventory,player,false);
+            pageMeta.setDisplayName("§1§2§3§4§5§6§f頁 "+ ++page+" / "+gui.takeGUI(player).getRemove().size());
         } else{
             return;
         }

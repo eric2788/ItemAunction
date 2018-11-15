@@ -56,7 +56,7 @@ public class TwGetExecutor implements CommandExecutor {
                 for (String item : map.keySet()){
                     ItemData data = map.get(item);
                     ItemStack stack = data.getItem();
-                    if (i % 20 == 0) {
+                    if (i % 20 == 0 && i > 0) {
                         pages.add(new ArrayList<>());
                         page++;
                     }
@@ -85,7 +85,7 @@ public class TwGetExecutor implements CommandExecutor {
                     player.sendMessage(Config.list);
                     pages.get(0).forEach(player::sendMessage);
                     player.sendMessage(Config.list_remind);
-                    player.sendMessage(Config.list_page.replace("<page>",0+"").replace("<max>",pages.size()+""));
+                    player.sendMessage(Config.list_page.replace("<page>",1+"").replace("<max>",pages.size()+""));
                 default:
                     player.sendMessage(Config.help);
                     break;
@@ -125,7 +125,7 @@ public class TwGetExecutor implements CommandExecutor {
                 player.sendMessage(Config.list);
                 pages.get(page).forEach(player::sendMessage);
                 player.sendMessage(Config.list_remind);
-                player.sendMessage(Config.list_page.replace("<page>",page+"").replace("<max>",pages.size()+""));
+                player.sendMessage(Config.list_page.replace("<page>",++page+"").replace("<max>",pages.size()+""));
                 break;
             default:
                 player.sendMessage(Config.help);

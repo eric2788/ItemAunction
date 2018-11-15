@@ -10,4 +10,4 @@ commands:
   twbuy:
     description: buy command
   twget:
-    description: get pre remove items command
+    description: get command
