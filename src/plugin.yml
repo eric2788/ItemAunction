@@ -1,5 +1,5 @@
-name: ItemAuction
-main: com.ericlam.main.ItemAuction
+name: ItemAunction
+main: com.ericlam.main.ItemAunction
 version: 1.0
 authors: [Eric Lam]
 soft-depend: [Vault]

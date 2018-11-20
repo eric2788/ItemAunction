@@ -183,7 +183,7 @@ public class GUIInventory {
             return false;
         }
 
-        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("DELETE FROM `"+Config.selltable+"` WHERE `ItemStack`=? AND `Trader-PlayerName=?` AND `Trader-Server`=?")){
+        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("DELETE FROM `"+Config.selltable+"` WHERE `ItemStack`=? AND `Trader-PlayerName`=? AND `Trader-Server`=?")){
             statement.setString(1, ItemStringConvert.itemStackToBase64(item));
             statement.setString(2,player.getName());
             statement.setString(3,Config.server);
@@ -219,7 +219,7 @@ public class GUIInventory {
         }
 
 
-        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("DELETE FROM `"+Config.pre_remove_table+"` WHERE `Owner-PlayerName=?` OR `Owner-UUID`=? AND `ItemStack`=? AND `Owner-Server`=?")){
+        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("DELETE FROM `"+Config.pre_remove_table+"` WHERE (`Owner-PlayerName`=? OR `Owner-UUID`=?) AND `ItemStack`=? AND `Owner-Server`=?")){
             statement.setString(1,player.getName());
             statement.setString(2,player.getUniqueId().toString());
             statement.setString(3, ItemStringConvert.itemStackToBase64(item));

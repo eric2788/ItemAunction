@@ -36,7 +36,7 @@ public class ItemAunction extends JavaPlugin {
         }
 
         if (this.getServer().getPluginManager().isPluginEnabled("Vault")){
-            RegisteredServiceProvider<Economy> rsp = plugin.getServer().getServicesManager().getRegistration(Economy.class);
+            RegisteredServiceProvider<Economy> rsp = this.getServer().getServicesManager().getRegistration(Economy.class);
             economy = rsp.getProvider();
         }else{
             console.sendMessage(ChatColor.RED+" 找不到Vault插件! 因此本插件並不會啟用。");
@@ -101,6 +101,8 @@ public class ItemAunction extends JavaPlugin {
             PreRemoveManager.getInstance().updateTimeStamp();
 
         },100L,Config.getInstance().getConfig().getInt("check-interval") * 60 * 20L);
+
+        //Bukkit.getScheduler().runTaskAsynchronously(this, ()->new CheckUpdate().plugin());
     }
 
     @Override

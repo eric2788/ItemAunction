@@ -62,11 +62,11 @@ public class PreRemoveManager {
                     if (playerIterator.hasNext()){
                         OfflinePlayer offline = playerIterator.next();
                         try(Connection connection = MySQLManager.getInstance().getConneciton();
-                            PreparedStatement check = connection.prepareStatement("SELECT `TimeStamp` FROM `"+ Config.pre_remove_table+"` WHERE `Owner-Name=?` OR `Owner-UUID`=? AND `Owner-Server`=?");
-                            PreparedStatement delete = connection.prepareStatement("DELETE FROM `"+Config.pre_remove_table+"` WHERE `Owner-Name=?` OR `Owner-UUID`=? AND `Owner-Server`=?")){
+                            PreparedStatement check = connection.prepareStatement("SELECT `TimeStamp` FROM `"+ Config.pre_remove_table+"` WHERE (`Owner-Name`=? OR `Owner-UUID`=?) AND `Owner-Server`=?");
+                            PreparedStatement delete = connection.prepareStatement("DELETE FROM `"+Config.pre_remove_table+"` WHERE (`Owner-Name`=? OR `Owner-UUID`=?) AND `Owner-Server`=?")){
 
-                            check.setString(1,offline.getUniqueId().toString());
-                            check.setString(2,offline.getName());
+                            check.setString(1,offline.getName());
+                            check.setString(2,offline.getUniqueId().toString());
                             check.setString(3,Config.server);
 
                             delete.setString(1,offline.getName());

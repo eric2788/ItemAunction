@@ -65,12 +65,12 @@ public class Config {
 
         String prefix = msg.getString("prefix");
         air = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("air"));
-        upload_success = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("upload-success"));
+        upload_success = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("check-success"));
         few_arug = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("few-arug"));
         long_arug = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("long-arug"));
         help = msg.getStringList("help").stream().map(help -> ChatColor.translateAlternateColorCodes('&',prefix+help)).toArray(String[]::new);
         exist = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("exist"));
-        upload_fail = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("upload-fail"));
+        upload_fail = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("check-fail"));
         take_success = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("take-success"));
         take_fail = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("take-fail"));
         no_exist = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("no-exist"));
@@ -100,15 +100,15 @@ public class Config {
         return manager;
     }
 
-    public FileConfiguration getConfig() {
+    public final FileConfiguration getConfig() {
         return config;
     }
 
-    public FileConfiguration getMsg(){
+    public final FileConfiguration getMsg(){
         return msg;
     }
 
-    public FileConfiguration getInventory() {
+    public final FileConfiguration getInventory() {
         return inventory;
     }
 }

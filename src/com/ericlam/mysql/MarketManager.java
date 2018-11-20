@@ -37,7 +37,7 @@ public class MarketManager {
 
     public LinkedHashMap<String, ItemData> listItems(Player player){
         LinkedHashMap<String,ItemData> map = new LinkedHashMap<>();
-        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `ItemStack`,`NameID`,`Money`,`TimeStamp` FROM `"+Config.selltable+"` WHERE `Seller-Name`=? OR `Seller-UUID`=? AND `Seller-Server`=? ORDER BY `NameID`")){
+        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `ItemStack`,`NameID`,`Money`,`TimeStamp` FROM `"+Config.selltable+"` WHERE (`Seller-Name`=? OR `Seller-UUID`=?) AND `Seller-Server`=? ORDER BY `NameID`")){
             statement.setString(1,player.getName());
             statement.setString(2,player.getUniqueId().toString());
             statement.setString(3,Config.server);
@@ -59,7 +59,7 @@ public class MarketManager {
     }
 
     public boolean hasItem(Player player,String nameid){
-        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `NameID` FROM `"+Config.selltable+"` WHERE `Seller-Name`=? OR `Seller-UUID`=? AND `Seller-Server`=? AND `NameID`=?")){
+        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `NameID` FROM `"+Config.selltable+"` WHERE (`Seller-Name`=? OR `Seller-UUID`=?) AND `Seller-Server`=? AND `NameID`=?")){
             statement.setString(1,player.getName());
             statement.setString(2,player.getUniqueId().toString());
             statement.setString(3,Config.server);
@@ -72,7 +72,7 @@ public class MarketManager {
     }
 
     private void oldPriceChecking(ItemStack item, Player player, int price) throws MoneyPriceException {
-        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `Money` FROM `"+Config.selltable+"` WHERE `Seller-Name`=? OR `Seller-UUID`=? AND `Seller-Server`=? AND `ItemStack`=?")){
+        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `Money` FROM `"+Config.selltable+"` WHERE (`Seller-Name`=? OR `Seller-UUID`=?) AND `Seller-Server`=? AND `ItemStack`=?")){
             statement.setString(1,player.getName());
             statement.setString(2,player.getUniqueId().toString());
             statement.setString(3,Config.server);
@@ -173,7 +173,7 @@ public class MarketManager {
     }
 
     public ItemStack getBackItem(Player player,String nameid){
-        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `ItemStack` FROM `"+Config.selltable+"` WHERE `Seller-Name`=? OR `Seller-UUID`=? AND `Seller-Server`=? AND `NameID`=?")){
+        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `ItemStack` FROM `"+Config.selltable+"` WHERE (`Seller-Name`=? OR `Seller-UUID`=?) AND `Seller-Server`=? AND `NameID`=?")){
             statement.setString(1,player.getName());
             statement.setString(2,player.getUniqueId().toString());
             statement.setString(3,Config.server);
@@ -199,9 +199,9 @@ public class MarketManager {
                 if (playerIterator.hasNext()){
                     OfflinePlayer offline = playerIterator.next();
                     try(Connection connection = MySQLManager.getInstance().getConneciton();
-                        PreparedStatement check = connection.prepareStatement("SELECT `TimeStamp`,`Item-Name`,`Item-Material`,`ItemStack`,`Item-Amount` FROM `"+Config.selltable+"` WHERE `Seller-Name=?` OR `Seller-UUID`=? AND `Seller-Server`=?");
+                        PreparedStatement check = connection.prepareStatement("SELECT `TimeStamp`,`Item-Name`,`Item-Material`,`ItemStack`,`Item-Amount` FROM `"+Config.selltable+"` WHERE (`Seller-Name`=? OR `Seller-UUID`=?) AND `Seller-Server`=?");
                         PreparedStatement preRemove = connection.prepareStatement("INSERT INTO `"+Config.pre_remove_table+"` VALUES (?,?,?,?,?,?,?,?)");
-                        PreparedStatement delete = connection.prepareStatement("DELETE FROM `"+Config.selltable+"` WHERE `Seller-Name=?` OR `Seller-UUID`=? AND `Seller-Server`=?")){
+                        PreparedStatement delete = connection.prepareStatement("DELETE FROM `"+Config.selltable+"` WHERE (`Seller-Name`=? OR `Seller-UUID`=?) AND `Seller-Server`=?")){
 
                         check.setString(1,offline.getUniqueId().toString());
                         check.setString(2,offline.getName());
