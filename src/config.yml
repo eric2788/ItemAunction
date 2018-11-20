@@ -4,7 +4,7 @@ enabled: false
 #最大金錢接受
 max-money: 200000000
 #伺服器ID辨認
-server: "default"
+server: default
 #下架檢查間隔 (分鐘)
 check-interval: 60
 #多少天後轉移到下架資料庫

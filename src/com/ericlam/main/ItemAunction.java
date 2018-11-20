@@ -8,6 +8,7 @@ import com.ericlam.listener.OnPlayerEvent;
 import com.ericlam.mysql.MarketManager;
 import com.ericlam.mysql.MySQLManager;
 import com.ericlam.mysql.PreRemoveManager;
+import com.ericlam.plugin.CheckUpdate;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -102,7 +103,7 @@ public class ItemAunction extends JavaPlugin {
 
         },100L,Config.getInstance().getConfig().getInt("check-interval") * 60 * 20L);
 
-        //Bukkit.getScheduler().runTaskAsynchronously(this, ()->new CheckUpdate().plugin());
+        Bukkit.getScheduler().runTaskAsynchronously(this, ()->new CheckUpdate().plugin());
     }
 
     @Override
