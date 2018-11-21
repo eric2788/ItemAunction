@@ -103,7 +103,7 @@ public class ItemAunction extends JavaPlugin {
 
         },100L,Config.getInstance().getConfig().getInt("check-interval") * 60 * 20L);
 
-        Bukkit.getScheduler().runTaskAsynchronously(this, ()->new CheckUpdate().plugin());
+        Bukkit.getScheduler().runTaskAsynchronously(this, ()->new CheckUpdate().run());
     }
 
     @Override
