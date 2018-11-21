@@ -51,7 +51,7 @@ public class Update extends Commander {
                 log.execute();
             }
             check();
-            Output.create();
+           Output.call().create();
             super.run();
         } catch (SQLException | IOException e) {
             new ScheduledThreadPoolExecutor(1).schedule(this,5,TimeUnit.MINUTES);

