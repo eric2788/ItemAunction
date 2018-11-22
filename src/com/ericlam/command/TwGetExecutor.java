@@ -14,7 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 
 public class TwGetExecutor implements CommandExecutor {
@@ -47,31 +47,6 @@ public class TwGetExecutor implements CommandExecutor {
             player.sendMessage(Config.help);
             return true;
         }
-        if (strings[0].equalsIgnoreCase("list")){
-            Bukkit.getScheduler().runTaskAsynchronously(plugin,()->{
-                pages.add(new ArrayList<>());
-                LinkedHashMap<String, ItemData> map = marketManager.listItems(player);
-                int page = 0;
-                int i = 0;
-                for (String item : map.keySet()){
-                    ItemData data = map.get(item);
-                    ItemStack stack = data.getItem();
-                    if (i % 20 == 0 && i > 0) {
-                        pages.add(new ArrayList<>());
-                        page++;
-                    }
-                    pages.get(page).add(Config.list_item
-                            .replace("<num>",i+"")
-                            .replace("<item-id>",item)
-                            .replace("<material>",stack.getType().toString())
-                            .replace("<amount>",stack.getAmount()+"")
-                            .replace("<item-name>",stack.getItemMeta().getDisplayName())
-                            .replace("<price>",data.getPrice()+"")
-                            .replace("<date>",data.getTimestamp()));
-                    i++;
-                }
-            });
-        }
         if (strings.length == 1){
             switch (strings[0]){
                 case "remove":
@@ -82,10 +57,25 @@ public class TwGetExecutor implements CommandExecutor {
                     player.openInventory(gui.takeGUI(player).getRemove().get(0));
                     break;
                 case "list":
-                    player.sendMessage(Config.list);
-                    pages.get(0).forEach(player::sendMessage);
-                    player.sendMessage(Config.list_remind);
-                    player.sendMessage(Config.list_page.replace("<page>",1+"").replace("<max>",pages.size()+""));
+                    Bukkit.getScheduler().runTaskAsynchronously(plugin,()->{
+                        pages.add(new ArrayList<>());
+                        HashMap<String, ItemData> map = marketManager.listItems(player);
+                        int page = 0;
+                        int i = 0;
+                        if (map.size() == 0) return;
+                        createPage(pages, map, page, i);
+                        Bukkit.getScheduler().runTask(plugin,()->{
+                            if (pages.size() == 0){
+                                player.sendMessage(Config.empty);
+                                return;
+                            }
+                            player.sendMessage(Config.list);
+                            pages.get(0).forEach(player::sendMessage);
+                            player.sendMessage(Config.list_remind);
+                            player.sendMessage(Config.list_page.replace("<page>",1+"").replace("<max>",pages.size()+""));
+                        });
+                    });
+                    break;
                 default:
                     player.sendMessage(Config.help);
                     break;
@@ -117,15 +107,25 @@ public class TwGetExecutor implements CommandExecutor {
                 break;
             case "list":
                 try{Integer.parseInt(strings[1]);}catch (NumberFormatException e){player.sendMessage(Config.not_number);}
-                int page = Integer.parseInt(strings[1]);
-                if (pages.get(page) == null){
-                    player.sendMessage(Config.no_this_page);
-                    return false;
-                }
-                player.sendMessage(Config.list);
-                pages.get(page).forEach(player::sendMessage);
-                player.sendMessage(Config.list_remind);
-                player.sendMessage(Config.list_page.replace("<page>",++page+"").replace("<max>",pages.size()+""));
+                int getpage = Integer.parseInt(strings[1]);
+                Bukkit.getScheduler().runTaskAsynchronously(plugin,()->{
+                    pages.add(new ArrayList<>());
+                    HashMap<String, ItemData> map = marketManager.listItems(player);
+                    int page = 0;
+                    int i = 0;
+                    if (map.size() == 0) return;
+                    createPage(pages, map, page, i);
+                    Bukkit.getScheduler().runTask(plugin,()->{
+                        if (pages.size() < getpage || getpage <= 0){
+                            player.sendMessage(Config.no_this_page);
+                            return;
+                        }
+                        player.sendMessage(Config.list);
+                        pages.get(getpage-1).forEach(player::sendMessage);
+                        player.sendMessage(Config.list_remind);
+                        player.sendMessage(Config.list_page.replace("<page>",getpage +"").replace("<max>",pages.size()+""));
+                    });
+                });
                 break;
             default:
                 player.sendMessage(Config.help);
@@ -134,5 +134,26 @@ public class TwGetExecutor implements CommandExecutor {
 
 
         return true;
+    }
+
+    private void createPage(List<List<String>> pages, HashMap<String, ItemData> map, int page, int i) {
+        for (String item : map.keySet()){
+            ItemData data = map.get(item);
+            ItemStack stack = data.getItem();
+            if (i % 20 == 0 && i > 0) {
+                pages.add(new ArrayList<>());
+                page++;
+            }
+            pages.get(page).add(Config.list_item
+                    .replace("<num>",i+"")
+                    .replace("<item-id>",item)
+                    .replace("<material>",stack.getType().toString())
+                    .replace("<amount>",stack.getAmount()+"")
+                    .replace("<item-name>",(stack.getItemMeta().getDisplayName().isEmpty() ? stack.getType().toString().replace("_"," ").toLowerCase() : stack.getItemMeta().getDisplayName()))
+                    .replace("<price>",data.getPrice()+"")
+                    .replace("<date>",data.getTimestamp()));
+            i++;
+            plugin.getLogger().info("one list added to pages");
+        }
     }
 }

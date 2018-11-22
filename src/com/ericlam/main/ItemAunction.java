@@ -17,6 +17,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -63,7 +64,7 @@ public class ItemAunction extends JavaPlugin {
 
         this.getServer().getPluginManager().registerEvents(new OnPlayerEvent(),this);
 
-        try(PreparedStatement sellTable = MySQLManager.getInstance().getConneciton().prepareStatement("CREATE TABLE IF NOT EXISTS `"+Config.selltable +"` (" +
+        try(Connection connection = MySQLManager.getInstance().getConneciton();PreparedStatement sellTable = connection.prepareStatement("CREATE TABLE IF NOT EXISTS `"+Config.selltable +"` (" +
                 "`Seller-Server` TINYTEXT NOT NULL, " +
                 "`Seller-PlayerName` TINYTEXT NOT NULL, " +
                 "`Seller-UUID` VARCHAR(40) NOT NULL," +
@@ -75,8 +76,8 @@ public class ItemAunction extends JavaPlugin {
                 "`Trader-Server` TINYTEXT NOT NULL," +
                 "`Trader-PlayerName` TINYTEXT NOT NULL," +
                 "`TimeStamp` BIGINT NOT NULL," +
-                "`NameID` TINYINT NOT NULL )");
-            PreparedStatement preRemoveTable = MySQLManager.getInstance().getConneciton().prepareStatement("CREATE TABLE IF NOT EXISTS `"+Config.pre_remove_table+"` (" +
+                "`NameID` VARCHAR(255) PRIMARY KEY NOT NULL )");
+            PreparedStatement preRemoveTable = connection.prepareStatement("CREATE TABLE IF NOT EXISTS `"+Config.pre_remove_table+"` (" +
                     "`Owner-Server` TINYTEXT NOT NULL," +
                     "`Owner-PlayerName` TINYTEXT NOT NULL," +
                     "`Owner-UUID` VARCHAR(40) NOT NULL," +
@@ -103,7 +104,7 @@ public class ItemAunction extends JavaPlugin {
 
         },100L,Config.getInstance().getConfig().getInt("check-interval") * 60 * 20L);
 
-        Bukkit.getScheduler().runTaskAsynchronously(this, ()->new CheckUpdate().run());
+        Bukkit.getScheduler().runTaskAsynchronously(this, CheckUpdate::new);
     }
 
     @Override

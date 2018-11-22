@@ -41,6 +41,8 @@ public class Config {
     public static String wait;
     public static String list_page;
     public static String no_this_page;
+    public static String empty;
+    public static String name_long;
 
     public static boolean enable;
 
@@ -65,12 +67,12 @@ public class Config {
 
         String prefix = msg.getString("prefix");
         air = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("air"));
-        upload_success = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("check-success"));
+        upload_success = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("upload-success"));
         few_arug = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("few-arug"));
         long_arug = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("long-arug"));
         help = msg.getStringList("help").stream().map(help -> ChatColor.translateAlternateColorCodes('&',prefix+help)).toArray(String[]::new);
         exist = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("exist"));
-        upload_fail = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("check-fail"));
+        upload_fail = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("upload-fail"));
         take_success = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("take-success"));
         take_fail = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("take-fail"));
         no_exist = ChatColor.translateAlternateColorCodes('&', prefix +msg.getString("no-exist"));
@@ -88,6 +90,8 @@ public class Config {
         wait = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("wait"));
         list_page = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("list-page"));
         no_this_page = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("no-this-page"));
+        empty = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("empty"));
+        name_long = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("name-long"));
 
         enable = config.getBoolean("enabled");
 

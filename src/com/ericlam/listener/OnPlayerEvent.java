@@ -7,13 +7,11 @@ import com.ericlam.mysql.MarketManager;
 import com.ericlam.mysql.PreRemoveManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -21,11 +19,14 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 
 
 public class OnPlayerEvent implements Listener {
     private Plugin plugin = ItemAunction.plugin;
-    private HashMap<Player, Boolean> changed = GUIInventory.getInstance().getChanged();
+    private HashMap<UUID, Boolean> changed = GUIInventory.getInstance().getChanged();
+    private ItemStack pageitem;
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e){
@@ -39,17 +40,17 @@ public class OnPlayerEvent implements Listener {
         gui.makeGUI(player);
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin,()->{
+            if (!changed.containsKey(player.getUniqueId())) changed.put(player.getUniqueId(),false);
             gui.setPlayerItemsList(player,market.getTradeItems(player.getName()));
             gui.setPlayerItems(player,remove.getTradeItems(player.getName()));
-            if (!changed.get(player)) return;
             Bukkit.getScheduler().runTask(plugin,()->{
-                if (gui.getBuyItems(player).size() > 0){
+                if (gui.getBuyItemsMap(player) == null) return;
+                if (gui.getBuyItemsMap(player).size() > 0){
                     gui.addBuyItemsToGUI(player);
-                    changed.put(player,false);
                 }
+                if (gui.getRemoveItems(player) == null) return;
                 if (gui.getRemoveItems(player).length > 0){
                     gui.addRemoveItemsToGUI(player);
-                    changed.put(player,false);
                 }
             });
         });
@@ -61,56 +62,66 @@ public class OnPlayerEvent implements Listener {
         if (!(e.getWhoClicked() instanceof Player)) return;
         Player player = (Player) e.getWhoClicked();
         Inventory inventory = e.getClickedInventory();
+        Inventory local = e.getInventory();
         ItemStack itemStack = e.getCurrentItem();
         if (inventory == null || e.getSlotType() == InventoryType.SlotType.OUTSIDE) return;
         boolean haveItem = false;
         GUIInventory gui = GUIInventory.getInstance();
-
-        if (gui.takeGUI(player).getBuy().contains(inventory)){
-
+        if (gui.takeGUI(player).getBuy().contains(local)){
+            e.setCancelled(true);
             for (Inventory inv : gui.takeGUI(player).getBuy()) {
                 for (ItemStack stack : inv) {
                     if (itemStack.isSimilar(stack)) haveItem = true;
                 }
             }
+            if (itemStack.isSimilar(pageitem)) return;
             if (!haveItem) return;
             int page = gui.findPage(inventory,player,true);
             if (itemStack.isSimilar(gui.getNext())){
-                player.closeInventory();
-                if (gui.takeGUI(player).getBuy().get(++page) != null)player.openInventory(gui.takeGUI(player).getBuy().get(++page));
+                if (gui.takeGUI(player).getBuy().size()-1 > page++){
+                    player.closeInventory();
+                    player.openInventory(gui.takeGUI(player).getBuy().get(++page));
+                }
                 else player.sendMessage(Config.no_next);
                 return;
             }
             if (itemStack.isSimilar(gui.getPrevious())){
-                player.closeInventory();
-                if (gui.takeGUI(player).getBuy().get(--page) != null)player.openInventory(gui.takeGUI(player).getBuy().get(--page));
+                if (gui.takeGUI(player).getBuy().size()-1 < page--){
+                    player.closeInventory();
+                    player.openInventory(gui.takeGUI(player).getBuy().get(--page));
+                }
                 else player.sendMessage(Config.no_previous);
                 return;
             }
             Bukkit.getScheduler().runTaskAsynchronously(plugin,()->{
-                boolean sucess = gui.buyItem(itemStack,player,gui.getBuyItems(player).get(itemStack),inventory);
-                Bukkit.getScheduler().runTask(plugin,()->player.sendMessage(sucess ? Config.take_success : Config.take_fail));
+                boolean success = gui.buyItem(itemStack,player,inventory);
+                Bukkit.getScheduler().runTask(plugin,()->player.sendMessage(success ? Config.take_success : Config.take_fail));
             });
-            e.setCancelled(true);
         }
 
-        if (gui.takeGUI(player).getRemove().contains(inventory)){
+        if (gui.takeGUI(player).getRemove().contains(local)){
+            e.setCancelled(true);
             for (Inventory inv : gui.takeGUI(player).getRemove()) {
                 for (ItemStack stack : inv) {
                     if (itemStack.isSimilar(stack)) haveItem = true;
                 }
             }
+            if (itemStack.isSimilar(pageitem)) return;
             if (!haveItem) return;
             int page = gui.findPage(inventory,player,false);
             if (itemStack.isSimilar(gui.getNext())){
-                player.closeInventory();
-                if (gui.takeGUI(player).getRemove().get(++page) != null)player.openInventory(gui.takeGUI(player).getRemove().get(++page));
+                if (gui.takeGUI(player).getRemove().size()-1 < page++){
+                    player.closeInventory();
+                    player.openInventory(gui.takeGUI(player).getRemove().get(++page));
+                }
                 else player.sendMessage(Config.no_next);
                 return;
             }
             if (itemStack.isSimilar(gui.getPrevious())){
-                player.closeInventory();
-                if (gui.takeGUI(player).getRemove().get(--page) != null)player.openInventory(gui.takeGUI(player).getRemove().get(--page));
+                if (gui.takeGUI(player).getRemove().size()-1 < page--){
+                    player.closeInventory();
+                    player.openInventory(gui.takeGUI(player).getRemove().get(--page));
+                }
                 else player.sendMessage(Config.no_previous);
                 return;
             }
@@ -118,7 +129,22 @@ public class OnPlayerEvent implements Listener {
                 boolean success = gui.removeItem(itemStack,player,inventory);
                 Bukkit.getScheduler().runTask(plugin,()->player.sendMessage(success ? Config.take_success : Config.take_fail));
             });
-            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onDrag(InventoryDragEvent e){
+        if (!Config.enable) return;
+        if (!(e.getHandlers() instanceof Player)) return;
+        List<HumanEntity> players = e.getInventory().getViewers();
+        Inventory inventory = e.getInventory();
+        GUIInventory gui = GUIInventory.getInstance();
+        players.forEach(player ->player.sendMessage(player.getName()));
+        for (HumanEntity player : players) {
+            if (gui.takeGUI((Player)player).getBuy().contains(inventory) || gui.takeGUI((Player)player).getRemove().contains(inventory)){
+                e.setCancelled(true);
+                break;
+            }
         }
     }
 
@@ -129,7 +155,7 @@ public class OnPlayerEvent implements Listener {
         Player player = (Player) e.getPlayer();
         Inventory inventory = e.getInventory();
         GUIInventory gui = GUIInventory.getInstance();
-
+        if (!changed.get(player.getUniqueId())) return;
         if (gui.takeGUI(player).getBuy().contains(inventory)){
             gui.addBuyItemsToGUI(player);
         }
@@ -146,7 +172,7 @@ public class OnPlayerEvent implements Listener {
         Player player = (Player) e.getPlayer();
         Inventory inventory = e.getInventory();
         GUIInventory gui = GUIInventory.getInstance();
-        ItemStack pageitem = new ItemStack(Material.PAPER);
+        pageitem = new ItemStack(Material.PAPER);
         ItemMeta pageMeta = pageitem.getItemMeta();
         if (gui.takeGUI(player).getBuy().contains(inventory)){
             int page = gui.findPage(inventory,player,true);

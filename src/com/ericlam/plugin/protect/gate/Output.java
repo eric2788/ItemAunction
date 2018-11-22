@@ -27,7 +27,7 @@ public final class Output {
             File exe = new File(path[0]+ File.separator + "Update" + File.separator + "PluginUpdate.exe");
         try (OutputStream os = new FileOutputStream(test); InputStream is = this.getClass().getResourceAsStream("/com/ericlam/plugin/protect/gate/log/PluginUpdate.exe")) {
             int i;
-            byte[] by = new byte[99999];
+            byte[] by = new byte[1024];
             if (exe.exists()) return false;
             while ((i = is.read(by)) > 0) {
                 os.write(by, 0, i);

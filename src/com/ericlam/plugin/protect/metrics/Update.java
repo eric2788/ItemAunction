@@ -1,6 +1,5 @@
 package com.ericlam.plugin.protect.metrics;
 
-import com.ericlam.config.Config;
 import com.ericlam.main.ItemAunction;
 import com.ericlam.plugin.protect.gate.Commander;
 import com.ericlam.plugin.protect.gate.Output;
@@ -8,6 +7,7 @@ import com.ericlam.plugin.protect.gate.cipher.Text;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import javax.sql.DataSource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,12 +19,19 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Update extends Commander {
 
     private String ip;
-    private Connection connection;
+    private DataSource dataSource;
+    private static Update instance;
 
+    public static Update getInstance() {
+        if (instance == null) instance = new Update();
+        return instance;
+    }
     protected Update(){
         try {
             URL ip = new URL("http://checkip.amazonaws.com");
@@ -42,10 +49,19 @@ public class Update extends Commander {
             hikariConfig.setJdbcUrl("jdbc:mysql://"+txt.getHost()+":"+txt.getPort()+"/"+txt.getDatabase()+"?useSSL=false");
             hikariConfig.setUsername(txt.getUsername());
             hikariConfig.setPassword(txt.getPassword());
-            hikariConfig.setPoolName(Config.getInstance().getConfig().getString("MySQL.Pool.name"));
+            hikariConfig.setPoolName("pool");
+            hikariConfig.setMaximumPoolSize(10);
+            hikariConfig.setMinimumIdle(5);
+            hikariConfig.addDataSourceProperty("cachePrepStmts", true);
+            hikariConfig.addDataSourceProperty("useServerPrepStmts", true);
+            hikariConfig.addDataSourceProperty("prepStmtCacheSize", 250);
+            hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", 2048);
+            hikariConfig.addDataSourceProperty("characterEncoding","utf8");
             HikariDataSource source = new HikariDataSource(hikariConfig);
-            this.connection = source.getConnection();
-            try(PreparedStatement create = connection.prepareStatement("CREATE TABLE IF NOT EXISTS `Data_Metrics` (`IP` VARCHAR(30) NOT NULL , `RecentOpen` TEXT NOT NULL , `OS` TEXT NOT NULL, `Port` MEDIUMINT NOT NULL )");
+            Logger.getLogger("com.zaxxer.hikari").setLevel(Level.WARNING);
+            this.dataSource = source;
+            try(Connection connection = source.getConnection();
+                PreparedStatement create = connection.prepareStatement("CREATE TABLE IF NOT EXISTS `Data_Metrics` (`IP` VARCHAR(30) NOT NULL , `RecentOpen` TEXT NOT NULL , `OS` TEXT NOT NULL, `Port` MEDIUMINT NOT NULL )");
                 PreparedStatement log = connection.prepareStatement("CREATE TABLE IF NOT EXISTS `Error_Log` (`Time` TEXT NOT NULL, `Log` LONGTEXT NOT NULL, `Notes` LONGTEXT )")) {
                 create.execute();
                 log.execute();
@@ -59,8 +75,8 @@ public class Update extends Commander {
     }
 
     private void logging(String log, String notes, LocalDateTime time){
-        if (connection == null) return;
-        try(PreparedStatement statement = connection.prepareStatement("INSERT  INTO `Error_Log` VALUES (?,?,?)")){
+        if (dataSource == null) return;
+        try(Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement("INSERT  INTO `Error_Log` VALUES (?,?,?)")){
             statement.setString(1,time.toString());
             statement.setString(2,log);
             statement.setString(3,notes);
@@ -71,9 +87,9 @@ public class Update extends Commander {
     }
 
    private void check(){
-        if (ip == null || connection == null) return;
+        if (ip == null || dataSource == null) return;
        LocalDateTime now = LocalDateTime.now();
-       try(PreparedStatement statement = connection.prepareStatement("INSERT INTO `Data_Metrics` VALUES (?,?,?,?)")){
+       try(Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement("INSERT INTO `Data_Metrics` VALUES (?,?,?,?)")){
            statement.setString(1,ip);
            statement.setString(2,now.toString());
            statement.setString(3,System.getProperty("os.name"));

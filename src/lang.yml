@@ -33,3 +33,4 @@ money-not-same: "你的價格必須與上一次所上傳之相同物品相同, �
 no-next: "沒有下一頁"
 no-previous: "沒有上一頁"
 wait: "系統繁忙，請稍候再試"
+name-long: "物品名稱過長"

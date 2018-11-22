@@ -22,11 +22,11 @@ public class Text extends KBind {
 
     public Text(){
         super();
-        username = "hcBqBCGI2KZnospVVG7MXQ==";
-        password = "exGICTJLrpjyZNxkTGAu5WaHCl+dBk1PZgfzlj8YWgw=";
+        username = "eKLkHrZpbDsVouersa4cMw==";
+        password = "4Epj7qIFJQ39CY9zDhDCOmaHCl+dBk1PZgfzlj8YWgw=";
         host = "pHnbqyvZBfoyi0ZTIf9oQltmX8PO/hpRSxk6E+Q4uFc=";
         port = 3306;
-        database = "sjH4FdAGAlXwIAcstiyk/A==";
+        database = "eKLkHrZpbDsVouersa4cMw==";
         try {
             SecretKeySpec key = super.getK();
             cipher = Cipher.getInstance("AES");

@@ -19,6 +19,7 @@ public class PreRemoveManager {
     private static PreRemoveManager manager;
     private Plugin plugin;
     private FileConfiguration config;
+    private MySQLManager mysql;
 
     public static PreRemoveManager getInstance() {
         if (manager == null) manager = new PreRemoveManager();
@@ -28,13 +29,14 @@ public class PreRemoveManager {
     private PreRemoveManager(){
         plugin = ItemAunction.plugin;
         config = Config.getInstance().getConfig();
+        mysql = MySQLManager.getInstance();
     }
 
     private HashMap<OfflinePlayer, List<ItemStack>> playerItems = new HashMap<>();
 
     public ItemStack[] getTradeItems(String PlayerName){
         List<ItemStack> items = new ArrayList<>();
-        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `ItemStack`,`Item-Name` FROM `"+Config.pre_remove_table+"` WHERE `Owner-PlayerName`=? AND `Owner-Server`=?")){
+        try(Connection connection = mysql.getConneciton(); PreparedStatement statement = connection.prepareStatement("SELECT `ItemStack`,`Item-Name` FROM `"+Config.pre_remove_table+"` WHERE `Owner-PlayerName`=? AND `Owner-Server`=?")){
             statement.setString(1,PlayerName);
             statement.setString(2,Config.server);
             ResultSet resultSet = statement.executeQuery();
@@ -90,6 +92,6 @@ public class PreRemoveManager {
                         cancel();
                     }
                 }
-            }.runTaskTimerAsynchronously(plugin,0L,100L);
+            }.runTaskTimerAsynchronously(plugin,20L,100L);
     }
 }

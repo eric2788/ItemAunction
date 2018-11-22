@@ -2,6 +2,7 @@ package com.ericlam.mysql;
 
 import com.ericlam.config.Config;
 import com.ericlam.converter.ItemStringConvert;
+import com.ericlam.inventory.BuyItems;
 import com.ericlam.inventory.ItemData;
 import com.ericlam.main.ItemAunction;
 import org.bukkit.Bukkit;
@@ -21,6 +22,7 @@ import java.util.*;
 
 public class MarketManager {
     private static MarketManager manager;
+    private MySQLManager mysql;
 
     public static MarketManager getInstance() {
         if (manager == null) manager = new MarketManager();
@@ -33,11 +35,12 @@ public class MarketManager {
     private MarketManager(){
         plugin = ItemAunction.plugin;
         config = Config.getInstance().getConfig();
+        mysql = MySQLManager.getInstance();
     }
 
-    public LinkedHashMap<String, ItemData> listItems(Player player){
-        LinkedHashMap<String,ItemData> map = new LinkedHashMap<>();
-        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `ItemStack`,`NameID`,`Money`,`TimeStamp` FROM `"+Config.selltable+"` WHERE (`Seller-PlayerName`=? OR `Seller-UUID`=?) AND `Seller-Server`=? ORDER BY `NameID`")){
+    public HashMap<String, ItemData> listItems(Player player){
+        HashMap<String,ItemData> map = new HashMap<>();
+        try(Connection connection = mysql.getConneciton(); PreparedStatement statement = connection.prepareStatement("SELECT `Item-Name`,`ItemStack`,`NameID`,`Money`,`TimeStamp` FROM `"+Config.selltable+"` WHERE (`Seller-PlayerName`=? OR `Seller-UUID`=?) AND `Seller-Server`=?")){
             statement.setString(1,player.getName());
             statement.setString(2,player.getUniqueId().toString());
             statement.setString(3,Config.server);
@@ -45,7 +48,7 @@ public class MarketManager {
             while (resultSet.next()){
                 ItemStack item = ItemStringConvert.itemStackFromBase64(resultSet.getString("ItemStack"));
                 int money = resultSet.getInt("Money");
-                long time = resultSet.getInt("TimeStamp");
+                long time = resultSet.getLong("TimeStamp");
                 if (item == null){
                     plugin.getServer().getLogger().info("警告: 物品 \""+resultSet.getString("Item-Name")+"\" 已損壞，無法使用。");
                     continue;
@@ -58,12 +61,9 @@ public class MarketManager {
         return map;
     }
 
-    public boolean hasItem(Player player,String nameid){
-        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `NameID` FROM `"+Config.selltable+"` WHERE (`Seller-PlayerName`=? OR `Seller-UUID`=?) AND `Seller-Server`=? AND `NameID`=?")){
-            statement.setString(1,player.getName());
-            statement.setString(2,player.getUniqueId().toString());
-            statement.setString(3,Config.server);
-            statement.setString(4,nameid);
+    public boolean hasItem(String nameid){
+        try(Connection connection = mysql.getConneciton(); PreparedStatement statement = connection.prepareStatement("SELECT `NameID` FROM `"+Config.selltable+"` WHERE `NameID`=?")){
+            statement.setString(1,nameid);
             return statement.executeQuery().next();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -72,7 +72,7 @@ public class MarketManager {
     }
 
     private void oldPriceChecking(ItemStack item, Player player, int price) throws MoneyPriceException {
-        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `Money` FROM `"+Config.selltable+"` WHERE (`Seller-PlayerName`=? OR `Seller-UUID`=?) AND `Seller-Server`=? AND `ItemStack`=?")){
+        try(Connection connection = mysql.getConneciton(); PreparedStatement statement = connection.prepareStatement("SELECT `Money` FROM `"+Config.selltable+"` WHERE (`Seller-PlayerName`=? OR `Seller-UUID`=?) AND `Seller-Server`=? AND `ItemStack`=?")){
             statement.setString(1,player.getName());
             statement.setString(2,player.getUniqueId().toString());
             statement.setString(3,Config.server);
@@ -89,16 +89,17 @@ public class MarketManager {
     }
 
     public boolean uploadItem(ItemStack item, Player player, int price,String nameid) throws MoneyPriceException {
-        if (hasItem(player,nameid)) return false;
+        if (hasItem(nameid)) return false;
         oldPriceChecking(item, player, price);
         String base64 = ItemStringConvert.itemStackToBase64(item);
         int amount = item.getAmount();
         String itemname = item.getItemMeta().getDisplayName();
         Material material = item.getType();
+        if (itemname == null || itemname.isEmpty()) itemname = material.toString().replace("_","").toLowerCase();
         String playername = player.getName();
         UUID playeruuid = player.getUniqueId();
         long timestamp = Timestamp.from(Instant.now()).getTime();
-           try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("INSERT INTO `"+ Config.selltable+"` VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")){
+           try(Connection connection = mysql.getConneciton(); PreparedStatement statement = connection.prepareStatement("INSERT INTO `"+ Config.selltable+"` VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")){
                statement.setString(1,Config.server);
                statement.setString(2,playername);
                statement.setString(3,playeruuid.toString());
@@ -120,16 +121,17 @@ public class MarketManager {
     }
 
     public boolean uploadItem(ItemStack item, Player player, int price, String target, String targetserver, String nameid) throws MoneyPriceException {
-        if (hasItem(player,nameid)) return false;
+        if (hasItem(nameid)) return false;
         oldPriceChecking(item, player, price);
         String base64 = ItemStringConvert.itemStackToBase64(item);
         int amount = item.getAmount();
         String itemname = item.getItemMeta().getDisplayName();
         Material material = item.getType();
+        if (itemname == null || itemname.isEmpty()) itemname = material.toString().replace("_","").toLowerCase();
         String playername = player.getName();
         UUID playeruuid = player.getUniqueId();
         long timestamp = Timestamp.from(Instant.now()).getTime();
-            try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("INSERT INTO `"+ Config.selltable+"` VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")){
+            try(Connection connection = mysql.getConneciton(); PreparedStatement statement = connection.prepareStatement("INSERT INTO `"+ Config.selltable+"` VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")){
                 statement.setString(1,Config.server);
                 statement.setString(2,playername);
                 statement.setString(3,playeruuid.toString());
@@ -150,20 +152,22 @@ public class MarketManager {
             }
     }
 
-    public HashMap<ItemStack, Integer> getTradeItems(String PlayerName){
-        HashMap<ItemStack, Integer> itemsPrices = new HashMap<>();
-        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `Money`,`ItemStack`,`Item-Name` FROM `"+Config.selltable+"` WHERE `Trader-PlayerName`=? AND `Trader-Server`=?")){
+
+    public HashMap<ItemStack, BuyItems> getTradeItems(String PlayerName){
+        HashMap<ItemStack, BuyItems> itemsPrices = new HashMap<>();
+        try(Connection connection = mysql.getConneciton(); PreparedStatement statement = connection.prepareStatement("SELECT `NameID`,`Money`,`ItemStack`,`Item-Name` FROM `"+Config.selltable+"` WHERE `Trader-PlayerName`=? AND `Trader-Server`=?")){
             statement.setString(1,PlayerName);
             statement.setString(2,Config.server);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()){
                 ItemStack item = ItemStringConvert.itemStackFromBase64(resultSet.getString("ItemStack"));
                 int price = resultSet.getInt("Money");
+                String nameId = resultSet.getString("NameID");
                 if (item == null){
                     plugin.getServer().getLogger().info("警告: 物品 \""+resultSet.getString("Item-Name")+"\" 已損壞，無法使用。");
                     continue;
                 }
-                itemsPrices.put(item,price);
+                itemsPrices.put(item,new BuyItems(price,nameId));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -173,14 +177,20 @@ public class MarketManager {
     }
 
     public ItemStack getBackItem(Player player,String nameid){
-        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `ItemStack` FROM `"+Config.selltable+"` WHERE (`Seller-PlayerName`=? OR `Seller-UUID`=?) AND `Seller-Server`=? AND `NameID`=?")){
-            statement.setString(1,player.getName());
-            statement.setString(2,player.getUniqueId().toString());
-            statement.setString(3,Config.server);
-            statement.setString(4,nameid);
-            ResultSet resultSet = statement.executeQuery();
+        try(PreparedStatement get = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `ItemStack` FROM `"+Config.selltable+"` WHERE (`Seller-PlayerName`=? OR `Seller-UUID`=?) AND `Seller-Server`=? AND `NameID`=?");
+            PreparedStatement delete = MySQLManager.getInstance().getConneciton().prepareStatement("DELETE FROM `"+Config.selltable+"` WHERE (`Seller-PlayerName`=? OR `Seller-UUID`=?) AND `Seller-Server`=? AND `NameID`=?")){
+            get.setString(1,player.getName());
+            get.setString(2,player.getUniqueId().toString());
+            get.setString(3,Config.server);
+            get.setString(4,nameid);
+            ResultSet resultSet = get.executeQuery();
             if (resultSet.next()){
                ItemStack item = ItemStringConvert.itemStackFromBase64(resultSet.getString("ItemStack"));
+                delete.setString(1,player.getName());
+                delete.setString(2,player.getUniqueId().toString());
+                delete.setString(3,Config.server);
+                delete.setString(4,nameid);
+                delete.execute();
                if (item != null) return item;
                 plugin.getServer().getLogger().info("警告: 物品 \""+resultSet.getString("Item-Name")+"\" 已損壞，無法使用。");
             }
@@ -242,11 +252,11 @@ public class MarketManager {
                     cancel();
                 }
             }
-        }.runTaskTimerAsynchronously(plugin,0L,100L);
+        }.runTaskTimerAsynchronously(plugin,10L,100L);
     }
 
     public int getPrice(ItemStack item,Player player){
-        try(PreparedStatement statement = MySQLManager.getInstance().getConneciton().prepareStatement("SELECT `Money` FROM `"+Config.selltable+"` WHERE `Trader-PlayerName`=? AND `Trader-Server`=? AND `ItemStack`=?")){
+        try(Connection connection = mysql.getConneciton(); PreparedStatement statement = connection.prepareStatement("SELECT `Money` FROM `"+Config.selltable+"` WHERE `Trader-PlayerName`=? AND `Trader-Server`=? AND `ItemStack`=?")){
             statement.setString(1,player.getName());
             statement.setString(2,Config.server);
             statement.setString(3,ItemStringConvert.itemStackToBase64(item));

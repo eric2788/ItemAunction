@@ -48,11 +48,22 @@ public class TwSellExecutor implements CommandExecutor {
             return false;
         }
         int money = Integer.parseInt(strings[0]);
+
+        if (money < 0){
+            player.sendMessage(Config.not_number);
+            return false;
+        }
         if (money > config.getInt("max-money")){
             player.sendMessage(Config.max_number);
             return false;
         }
         String itemname = strings[1];
+
+        if (itemname.length() > 255){
+            player.sendMessage(Config.name_long);
+            return false;
+        }
+
         ItemStack item = player.getInventory().getItemInMainHand();
         MarketManager market = MarketManager.getInstance();
 
@@ -64,7 +75,7 @@ public class TwSellExecutor implements CommandExecutor {
         if (strings.length == 2){
             Bukkit.getScheduler().runTaskAsynchronously(plugin,()->{
                 try {
-                    if (market.hasItem(player, itemname)) {
+                    if (!market.hasItem(itemname)) {
                         boolean success = market.uploadItem(item, player, money, itemname);
                         Bukkit.getScheduler().runTask(plugin, () -> {
                             player.sendMessage(success ? Config.upload_success : Config.upload_fail);
@@ -95,7 +106,7 @@ public class TwSellExecutor implements CommandExecutor {
         String server = strings[3];
         Bukkit.getScheduler().runTaskAsynchronously(plugin,()->{
             try {
-                if (market.hasItem(player, itemname)) {
+                if (!market.hasItem(itemname)) {
                     boolean success = market.uploadItem(item, player, money, name, server, itemname);
                     Bukkit.getScheduler().runTask(plugin, () -> {
                         player.sendMessage(success ? Config.upload_success : Config.upload_fail);
