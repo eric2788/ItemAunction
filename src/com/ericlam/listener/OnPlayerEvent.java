@@ -48,7 +48,7 @@ public class OnPlayerEvent implements Listener {
                 if (gui.getBuyItemsMap(player) != null && gui.getBuyItemsMap(player).size() > 0) {
                     gui.addBuyItemsToGUI(player);
                 }
-                if (gui.getRemoveItems(player) != null && gui.getRemoveItems(player).length > 0) {
+                if (gui.getRemoveItems(player) != null && gui.getRemoveItems(player).size() > 0) {
                     gui.addRemoveItemsToGUI(player);
                 }
             });

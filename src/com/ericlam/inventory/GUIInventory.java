@@ -22,13 +22,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class GUIInventory {
     private HashMap<UUID, Inventories> playerInv = new HashMap<>();
     private HashMap<UUID, ArrayList<BuyItems>> playerItemsList = new HashMap<>();
-    private HashMap<UUID, ItemStack[]> playerItems = new HashMap<>();
+    private HashMap<UUID, List<ItemStack>> playerItems = new HashMap<>();
     private HashMap<UUID, Boolean> changed = new HashMap<>();
     private FileConfiguration gui;
     private ItemStack previous;
@@ -62,14 +65,12 @@ public class GUIInventory {
         playerItemsList.get(player.getUniqueId()).removeIf(buyItems -> buyItems.getNameId().equals(nameId));
     }
 
-    public ItemStack[] getRemoveItems(Player player) {
+    public List<ItemStack> getRemoveItems(Player player) {
         return playerItems.get(player.getUniqueId());
     }
 
     private void removeRemoveItems(Player player, ItemStack itemStack){
-        ItemStack[] items = playerItems.get(player.getUniqueId());
-        items = Arrays.stream(items).filter(item -> !item.isSimilar(itemStack)).toArray(ItemStack[]::new);
-        playerItems.put(player.getUniqueId(),items);
+        playerItems.get(player.getUniqueId()).removeIf(item -> item.isSimilar(itemStack));
     }
 
     public void setPlayerItemsList(Player player, ArrayList<BuyItems> items) {
@@ -80,9 +81,10 @@ public class GUIInventory {
         changed.put(player.getUniqueId(),true);
     }
 
-    public void setPlayerItems(Player player,ItemStack[] item){
-        if (item.length == 0 ) return;
-        if (playerItems.containsKey(player.getUniqueId()) && item.length == playerItems.get(player.getUniqueId()).length) return;
+    public void setPlayerItems(Player player, List<ItemStack> item) {
+        if (item.size() == 0) return;
+        if (playerItems.containsKey(player.getUniqueId()) && item.size() == playerItems.get(player.getUniqueId()).size())
+            return;
         playerItems.put(player.getUniqueId(),item);
         changed.put(player.getUniqueId(),true);
     }
@@ -154,12 +156,12 @@ public class GUIInventory {
     public void addRemoveItemsToGUI(Player player){
         if (!changed.get(player.getUniqueId())) return;
         playerInv.put(player.getUniqueId(), new Inventories(getNewBuyInv(), getNewRemoveInv()));
-        ItemStack[] items = getRemoveItems(player);
-        if (items == null || items.length == 0) return;
+        List<ItemStack> items = getRemoveItems(player);
+        if (items == null || items.size() == 0) return;
         List<Inventory> remove = takeGUI(player).getRemove();
         int page = 0;
-        for (int i = 0; i < items.length;i++) {
-            ItemStack item = items[i];
+        for (int i = 0; i < items.size(); i++) {
+            ItemStack item = items.get(i);
             if (i % 45 == 0 && i > 0){
                 remove.add(getNewRemoveInv());
                 page++;
@@ -308,8 +310,8 @@ public class GUIInventory {
             return false;
         }
 
+        removeRemoveItems(player, item);
         changed.put(player.getUniqueId(),true);
-        removeRemoveItems(player,item);
         return true;
     }
 

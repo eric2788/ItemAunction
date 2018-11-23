@@ -33,9 +33,8 @@ public class PreRemoveManager {
         mysql = MySQLManager.getInstance();
     }
 
-    public ItemStack[] getTradeItems(String PlayerName){
+    public List<ItemStack> getTradeItems(String PlayerName) {
         List<ItemStack> items = new ArrayList<>();
-        ItemStack[] st = new ItemStack[0];
         try(Connection connection = mysql.getConneciton(); PreparedStatement statement = connection.prepareStatement("SELECT `ItemStack`,`Item-Name` FROM `"+Config.pre_remove_table+"` WHERE `Owner-PlayerName`=? AND `Owner-Server`=?")){
             statement.setString(1,PlayerName);
             statement.setString(2,Config.server);
@@ -60,12 +59,11 @@ public class PreRemoveManager {
                 }
                 items.add(clone);
             }
-            st = items.toArray(new ItemStack[0]);
         } catch (SQLException e) {
             e.printStackTrace();
 
         }
-        return st;
+        return items;
     }
 
     public void updateTimeStamp(){
