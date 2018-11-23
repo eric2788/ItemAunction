@@ -132,7 +132,7 @@ public class ItemAunction extends JavaPlugin {
                 player.sendMessage(Config.air);
                 return false;
             }
-            Bukkit.getScheduler().runTask(plugin, () -> {
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 boolean success = testRemove(player, item);
                 player.sendMessage(success ? Config.upload_success : Config.upload_fail);
                 if (success) player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
