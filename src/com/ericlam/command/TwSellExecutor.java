@@ -77,15 +77,13 @@ public class TwSellExecutor implements CommandExecutor {
                 try {
                     if (!market.hasItem(itemname)) {
                         boolean success = market.uploadItem(item, player, money, itemname);
-                        Bukkit.getScheduler().runTask(plugin, () -> {
-                            player.sendMessage(success ? Config.upload_success : Config.upload_fail);
-                            if (success) player.getInventory().remove(item);
-                        });
+                        player.sendMessage(success ? Config.upload_success : Config.upload_fail);
+                        if (success) player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
                     } else {
-                        Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(Config.exist));
+                        player.sendMessage(Config.exist);
                     }
                 }catch (MoneyPriceException e){
-                    Bukkit.getScheduler().runTask(plugin,()->player.sendMessage(Config.money_not_same.replace("<price>",e.getMessage())));
+                    player.sendMessage(Config.money_not_same.replace("<price>",e.getMessage()));
                 }
             });
 
@@ -108,15 +106,14 @@ public class TwSellExecutor implements CommandExecutor {
             try {
                 if (!market.hasItem(itemname)) {
                     boolean success = market.uploadItem(item, player, money, name, server, itemname);
-                    Bukkit.getScheduler().runTask(plugin, () -> {
-                        player.sendMessage(success ? Config.upload_success : Config.upload_fail);
-                        if (success) player.getInventory().remove(item);
-                    });
+                    player.sendMessage(success ? Config.upload_success : Config.upload_fail);
+                    if (success) player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
+
                 } else {
-                    Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(Config.exist));
+                    player.sendMessage(Config.exist);
                 }
             }catch (MoneyPriceException e){
-                Bukkit.getScheduler().runTask(plugin,()->player.sendMessage(Config.money_not_same.replace("<price>",e.getMessage())));
+                player.sendMessage(Config.money_not_same.replace("<price>",e.getMessage()));
             }
         });
         return true;

@@ -20,5 +20,6 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="Vault" level="project" />
+    <orderEntry type="library" name="commons-io-2.6" level="project" />
   </component>
 </module>

@@ -2,7 +2,7 @@ package com.ericlam.command;
 
 import com.ericlam.config.Config;
 import com.ericlam.inventory.GUIInventory;
-import com.ericlam.inventory.ItemData;
+import com.ericlam.inventory.constructors.ItemData;
 import com.ericlam.main.ItemAunction;
 import com.ericlam.mysql.MarketManager;
 import org.bukkit.Bukkit;
@@ -15,6 +15,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class TwGetExecutor implements CommandExecutor {
@@ -59,21 +60,19 @@ public class TwGetExecutor implements CommandExecutor {
                 case "list":
                     Bukkit.getScheduler().runTaskAsynchronously(plugin,()->{
                         pages.add(new ArrayList<>());
-                        HashMap<String, ItemData> map = marketManager.listItems(player);
+                        LinkedHashMap<String, ItemData> map = marketManager.listItems(player);
                         int page = 0;
                         int i = 0;
                         if (map.size() == 0) return;
                         createPage(pages, map, page, i);
-                        Bukkit.getScheduler().runTask(plugin,()->{
                             if (pages.size() == 0){
                                 player.sendMessage(Config.empty);
                                 return;
                             }
-                            player.sendMessage(Config.list);
-                            pages.get(0).forEach(player::sendMessage);
-                            player.sendMessage(Config.list_remind);
-                            player.sendMessage(Config.list_page.replace("<page>",1+"").replace("<max>",pages.size()+""));
-                        });
+                        player.sendMessage(Config.list);
+                        pages.get(0).forEach(player::sendMessage);
+                        player.sendMessage(Config.list_remind);
+                        player.sendMessage(Config.list_page.replace("<page>", 1 + "").replace("<max>", pages.size() + ""));
                     });
                     break;
                 default:
@@ -94,15 +93,13 @@ public class TwGetExecutor implements CommandExecutor {
 
                 Bukkit.getScheduler().runTaskAsynchronously(plugin,()->{
                     ItemStack item = marketManager.getBackItem(player,itemname);
-                    Bukkit.getScheduler().runTask(plugin,()->{
-                        if (item == null || item.getType() == Material.AIR){
-                            player.sendMessage(Config.no_exist);
-                            player.sendMessage(Config.take_fail);
-                            return;
-                        }
-                        if (player.getInventory().addItem(item).size() == 0) player.sendMessage(Config.take_success);
-                        else player.sendMessage(Config.take_fail);
-                    });
+                    if (item == null || item.getType() == Material.AIR){
+                        player.sendMessage(Config.no_exist);
+                        player.sendMessage(Config.take_fail);
+                        return;
+                    }
+                    if (player.getInventory().addItem(item).size() == 0) player.sendMessage(Config.take_success);
+                    else player.sendMessage(Config.take_fail);
                 });
                 break;
             case "list":
@@ -110,21 +107,20 @@ public class TwGetExecutor implements CommandExecutor {
                 int getpage = Integer.parseInt(strings[1]);
                 Bukkit.getScheduler().runTaskAsynchronously(plugin,()->{
                     pages.add(new ArrayList<>());
-                    HashMap<String, ItemData> map = marketManager.listItems(player);
+                    LinkedHashMap<String, ItemData> map = marketManager.listItems(player);
                     int page = 0;
                     int i = 0;
                     if (map.size() == 0) return;
                     createPage(pages, map, page, i);
-                    Bukkit.getScheduler().runTask(plugin,()->{
                         if (pages.size() < getpage || getpage <= 0){
                             player.sendMessage(Config.no_this_page);
                             return;
                         }
-                        player.sendMessage(Config.list);
-                        pages.get(getpage-1).forEach(player::sendMessage);
-                        player.sendMessage(Config.list_remind);
-                        player.sendMessage(Config.list_page.replace("<page>",getpage +"").replace("<max>",pages.size()+""));
-                    });
+                    player.sendMessage(Config.list);
+                    pages.get(getpage - 1).forEach(player::sendMessage);
+                    player.sendMessage(Config.list_remind);
+                    player.sendMessage(Config.list_page.replace("<page>", getpage + "").replace("<max>", pages.size() + ""));
+
                 });
                 break;
             default:
@@ -140,12 +136,12 @@ public class TwGetExecutor implements CommandExecutor {
         for (String item : map.keySet()){
             ItemData data = map.get(item);
             ItemStack stack = data.getItem();
-            if (i % 20 == 0 && i > 0) {
+            if (i % 5 == 0 && i > 0) {
                 pages.add(new ArrayList<>());
                 page++;
             }
             pages.get(page).add(Config.list_item
-                    .replace("<num>",i+"")
+                    .replace("<num>",i+1+"")
                     .replace("<item-id>",item)
                     .replace("<material>",stack.getType().toString())
                     .replace("<amount>",stack.getAmount()+"")
@@ -153,7 +149,6 @@ public class TwGetExecutor implements CommandExecutor {
                     .replace("<price>",data.getPrice()+"")
                     .replace("<date>",data.getTimestamp()));
             i++;
-            plugin.getLogger().info("one list added to pages");
         }
     }
 }

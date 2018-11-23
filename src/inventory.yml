@@ -5,9 +5,10 @@ buy-inventory:
   title: "buylist"
   extra-lore:
     - "&7&l============="
-    - "&e$ <money>"
+    - "&e$<money>"
 pre-remove-inventory:
   title: "removelist"
   extra-lore:
+    - "Repeat: <repeat>"
     - "&7&l==============="
     - "Click item to get back"

@@ -4,6 +4,7 @@ import com.ericlam.config.Config;
 import com.ericlam.converter.ItemStringConvert;
 import com.ericlam.main.ItemAunction;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
@@ -32,10 +33,9 @@ public class PreRemoveManager {
         mysql = MySQLManager.getInstance();
     }
 
-    private HashMap<OfflinePlayer, List<ItemStack>> playerItems = new HashMap<>();
-
     public ItemStack[] getTradeItems(String PlayerName){
         List<ItemStack> items = new ArrayList<>();
+        ItemStack[] st = new ItemStack[0];
         try(Connection connection = mysql.getConneciton(); PreparedStatement statement = connection.prepareStatement("SELECT `ItemStack`,`Item-Name` FROM `"+Config.pre_remove_table+"` WHERE `Owner-PlayerName`=? AND `Owner-Server`=?")){
             statement.setString(1,PlayerName);
             statement.setString(2,Config.server);
@@ -46,13 +46,26 @@ public class PreRemoveManager {
                     plugin.getServer().getLogger().info("警告: 物品 \""+resultSet.getString("Item-Name")+"\" 已損壞，無法使用。");
                     continue;
                 }
-                items.add(item);
+                List<String> extralore = new ArrayList<>();
+                for (String s : Config.getInstance().getInventory().getStringList("pre-remove-inventory.extra-lore")) {
+                    extralore.add(ChatColor.translateAlternateColorCodes('&',s));
+                }
+                ItemStack clone = item.clone();
+                List<String> lore = item.getItemMeta().getLore();
+                if (lore == null || lore.size() == 0) {
+                    clone.setLore(extralore);
+                } else {
+                    lore.addAll(extralore);
+                    clone.setLore(lore);
+                }
+                items.add(clone);
             }
+             st = items.toArray(new ItemStack[0]);
         } catch (SQLException e) {
             e.printStackTrace();
 
         }
-        return items.toArray(new ItemStack[0]);
+        return st;
     }
 
     public void updateTimeStamp(){
@@ -81,7 +94,7 @@ public class PreRemoveManager {
                                 LocalDate now = LocalDate.now();
                                 LocalDate first = new Timestamp(time).toLocalDateTime().toLocalDate();
                                 Period period = Period.between(first,now);
-                                if (period.getDays() >= config.getInt("delay-expire-days")){
+                                if (period.getDays() >= config.getInt("remove-days")){
                                     delete.execute();
                                 }
                             }
