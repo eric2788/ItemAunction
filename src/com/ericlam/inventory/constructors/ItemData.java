@@ -1,4 +1,4 @@
-package com.ericlam.inventory;
+package com.ericlam.inventory.constructors;
 
 import org.bukkit.inventory.ItemStack;
 

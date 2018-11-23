@@ -9,6 +9,6 @@ buy-inventory:
 pre-remove-inventory:
   title: "removelist"
   extra-lore:
-    - "Repeat: <repeat>"
+  - "Repeat: <repeat>"
     - "&7&l==============="
     - "Click item to get back"

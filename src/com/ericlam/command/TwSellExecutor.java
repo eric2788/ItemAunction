@@ -83,7 +83,7 @@ public class TwSellExecutor implements CommandExecutor {
                         player.sendMessage(Config.exist);
                     }
                 }catch (MoneyPriceException e){
-                    player.sendMessage(Config.money_not_same.replace("<price>",e.getMessage()));
+                    player.sendMessage(Config.money_not_same.replace("<price>", e.getMessage()));
                 }
             });
 
@@ -113,7 +113,7 @@ public class TwSellExecutor implements CommandExecutor {
                     player.sendMessage(Config.exist);
                 }
             }catch (MoneyPriceException e){
-                player.sendMessage(Config.money_not_same.replace("<price>",e.getMessage()));
+                player.sendMessage(Config.money_not_same.replace("<price>", e.getMessage()));
             }
         });
         return true;

@@ -39,9 +39,9 @@ public class MarketManager {
         mysql = MySQLManager.getInstance();
     }
 
-    public LinkedHashMap<String, ItemData> listItems(Player player){
-        LinkedHashMap<String,ItemData> map = new LinkedHashMap<>();
-        try(Connection connection = mysql.getConneciton(); PreparedStatement statement = connection.prepareStatement("SELECT `Item-Name`,`ItemStack`,`NameID`,`Money`,`TimeStamp` FROM `"+Config.selltable+"` WHERE (`Seller-PlayerName`=? OR `Seller-UUID`=?) AND `Seller-Server`=? ORDER BY `NameID`")){
+    public LinkedHashMap<String, ItemData> listItems(Player player) {
+        LinkedHashMap<String, ItemData> map = new LinkedHashMap<>();
+        try (Connection connection = mysql.getConneciton(); PreparedStatement statement = connection.prepareStatement("SELECT `Item-Name`,`ItemStack`,`NameID`,`Money`,`TimeStamp` FROM `" + Config.selltable + "` WHERE (`Seller-PlayerName`=? OR `Seller-UUID`=?) AND `Seller-Server`=? ORDER BY `NameID`")) {
             statement.setString(1,player.getName());
             statement.setString(2,player.getUniqueId().toString());
             statement.setString(3,Config.server);
@@ -89,7 +89,7 @@ public class MarketManager {
         }
     }
 
-    public boolean uploadItem(ItemStack item, Player player, int price,String nameid) throws MoneyPriceException{
+    public boolean uploadItem(ItemStack item, Player player, int price, String nameid) throws MoneyPriceException {
         if (hasItem(nameid)) return false;
         oldPriceChecking(item, player, price);
         String base64 = ItemStringConvert.itemStackToBase64(item);
@@ -121,17 +121,17 @@ public class MarketManager {
            }
     }
 
-    public ArrayList<BuyItems> getTradeItems(String PlayerName){
+    public ArrayList<BuyItems> getTradeItems(String PlayerName) {
         ArrayList<BuyItems> sqlItems = new ArrayList<>();
         ArrayList<ItemStack> repeats = new ArrayList<>();
-        try(Connection connection = mysql.getConneciton(); PreparedStatement statement = connection.prepareStatement("SELECT `NameID`,`Money`,`ItemStack`,`Item-Name` FROM `"+Config.selltable+"` WHERE `Trader-PlayerName`=? AND `Trader-Server`=?")){
-            statement.setString(1,PlayerName);
-            statement.setString(2,Config.server);
+        try (Connection connection = mysql.getConneciton(); PreparedStatement statement = connection.prepareStatement("SELECT `NameID`,`Money`,`ItemStack`,`Item-Name` FROM `" + Config.selltable + "` WHERE `Trader-PlayerName`=? AND `Trader-Server`=?")) {
+            statement.setString(1, PlayerName);
+            statement.setString(2, Config.server);
             ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()){
+            while (resultSet.next()) {
                 final ItemStack item = ItemStringConvert.itemStackFromBase64(resultSet.getString("ItemStack"));
-                if (item == null){
-                    plugin.getServer().getLogger().info("警告: 物品 \""+resultSet.getString("Item-Name")+"\" 已損壞，無法使用。");
+                if (item == null) {
+                    plugin.getServer().getLogger().info("警告: 物品 \"" + resultSet.getString("Item-Name") + "\" 已損壞，無法使用。");
                     continue;
                 }
                 final int price = resultSet.getInt("Money");
@@ -145,19 +145,19 @@ public class MarketManager {
                 }
                 repeats.add(item);
                 for (String s : Config.getInstance().getInventory().getStringList("buy-inventory.extra-lore")) {
-                    extralore.add(ChatColor.translateAlternateColorCodes('&',s
-                            .replace("<money>", price+"")
-                            .replace("<repeat>",(repeat == 0 ? "" : repeat+""))));
+                    extralore.add(ChatColor.translateAlternateColorCodes('&', s
+                            .replace("<money>", price + "")
+                            .replace("<repeat>", (repeat == 0 ? "" : repeat + ""))));
                 }
                 List<String> lore = item.getItemMeta().getLore();
                 ItemStack clone = item.clone();
-                if (lore == null || lore.size() == 0 ){
+                if (lore == null || lore.size() == 0) {
                     clone.setLore(extralore);
                 } else {
                     lore.addAll(extralore);
                     clone.setLore(lore);
                 }
-                sqlItems.add(new BuyItems(price,nameId,clone));
+                sqlItems.add(new BuyItems(price, nameId, clone));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -198,9 +198,9 @@ public class MarketManager {
     }
 
     public ItemStack getBackItem(Player player,String nameid){
-        try(Connection connection = MySQLManager.getInstance().getConneciton();
-            PreparedStatement get = connection.prepareStatement("SELECT `ItemStack` FROM `"+Config.selltable+"` WHERE (`Seller-PlayerName`=? OR `Seller-UUID`=?) AND `Seller-Server`=? AND `NameID`=?");
-            PreparedStatement delete = connection.prepareStatement("DELETE FROM `"+Config.selltable+"` WHERE (`Seller-PlayerName`=? OR `Seller-UUID`=?) AND `Seller-Server`=? AND `NameID`=?")){
+        try (Connection connection = MySQLManager.getInstance().getConneciton();
+             PreparedStatement get = connection.prepareStatement("SELECT `ItemStack` FROM `" + Config.selltable + "` WHERE (`Seller-PlayerName`=? OR `Seller-UUID`=?) AND `Seller-Server`=? AND `NameID`=?");
+             PreparedStatement delete = connection.prepareStatement("DELETE FROM `" + Config.selltable + "` WHERE (`Seller-PlayerName`=? OR `Seller-UUID`=?) AND `Seller-Server`=? AND `NameID`=?")) {
             get.setString(1,player.getName());
             get.setString(2,player.getUniqueId().toString());
             get.setString(3,Config.server);
@@ -231,9 +231,9 @@ public class MarketManager {
                 if (playerIterator.hasNext()){
                     OfflinePlayer offline = playerIterator.next();
                     try(Connection connection = MySQLManager.getInstance().getConneciton();
-                        PreparedStatement check = connection.prepareStatement("SELECT `NameID`,`TimeStamp`,`Item-Name`,`Item-Material`,`ItemStack`,`Item-Amount` FROM `"+Config.selltable+"` WHERE (`Seller-PlayerName`=? OR `Seller-UUID`=?) AND `Seller-Server`=?");
+                        PreparedStatement check = connection.prepareStatement("SELECT `NameID`,`TimeStamp`,`Item-Name`,`Item-Material`,`ItemStack`,`Item-Amount` FROM `" + Config.selltable + "` WHERE (`Seller-PlayerName`=? OR `Seller-UUID`=?) AND `Seller-Server`=?");
                         PreparedStatement preRemove = connection.prepareStatement("INSERT INTO `"+Config.pre_remove_table+"` VALUES (?,?,?,?,?,?,?,?)");
-                        PreparedStatement delete = connection.prepareStatement("DELETE FROM `"+Config.selltable+"` WHERE (`Seller-PlayerName`=? OR `Seller-UUID`=?) AND `Seller-Server`=? AND `NameID`=?")){
+                        PreparedStatement delete = connection.prepareStatement("DELETE FROM `" + Config.selltable + "` WHERE (`Seller-PlayerName`=? OR `Seller-UUID`=?) AND `Seller-Server`=? AND `NameID`=?")) {
 
                         check.setString(1,offline.getUniqueId().toString());
                         check.setString(2,offline.getName());
@@ -265,7 +265,7 @@ public class MarketManager {
                                 preRemove.setString(7,base64);
                                 preRemove.setLong(8,Timestamp.from(Instant.now()).getTime());
                                 preRemove.execute();
-                                delete.setString(4,nameId);
+                                delete.setString(4, nameId);
                                 delete.execute();
                             }
                         }

@@ -4,6 +4,7 @@ import com.ericlam.command.TwBuyExecutor;
 import com.ericlam.command.TwGetExecutor;
 import com.ericlam.command.TwSellExecutor;
 import com.ericlam.config.Config;
+import com.ericlam.converter.ItemStringConvert;
 import com.ericlam.listener.OnPlayerEvent;
 import com.ericlam.mysql.MarketManager;
 import com.ericlam.mysql.MySQLManager;
@@ -12,7 +13,13 @@ import com.ericlam.plugin.CheckUpdate;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -20,6 +27,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Instant;
 
 public class ItemAunction extends JavaPlugin {
     public static Plugin plugin;
@@ -110,5 +119,49 @@ public class ItemAunction extends JavaPlugin {
     @Override
     public void onDisable() {
 
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+
+        if (command.getName().equalsIgnoreCase("twrm")) {
+            if (sender instanceof ConsoleCommandSender) return false;
+            Player player = (Player) sender;
+            ItemStack item = player.getInventory().getItemInMainHand();
+            if (item.getType() == Material.AIR) {
+                player.sendMessage(Config.air);
+                return false;
+            }
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                boolean success = testRemove(player, item);
+                player.sendMessage(success ? Config.upload_success : Config.upload_fail);
+                if (success) player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
+            });
+        }
+        return true;
+    }
+
+    private boolean testRemove(Player player, ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+        String name = meta.getDisplayName();
+        int amount = item.getAmount();
+        Material mt = item.getType();
+        long now = Timestamp.from(Instant.now()).getTime();
+        String base64 = ItemStringConvert.itemStackToBase64(item);
+        try (Connection connection = MySQLManager.getInstance().getConneciton(); PreparedStatement statement = connection.prepareStatement("INSERT INTO `" + Config.pre_remove_table + "` VALUES (?,?,?,?,?,?,?,?)")) {
+            statement.setString(1, Config.server);
+            statement.setString(2, player.getName());
+            statement.setString(3, player.getUniqueId().toString());
+            statement.setString(4, (name.isEmpty() ? mt.toString().replace("_", " ").toLowerCase() : name));
+            statement.setString(5, mt.toString());
+            statement.setInt(6, amount);
+            statement.setString(7, base64);
+            statement.setLong(8, now);
+            statement.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

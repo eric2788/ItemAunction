@@ -93,7 +93,7 @@ public class Config {
         no_this_page = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("no-this-page"));
         empty = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("empty"));
         name_long = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("name-long"));
-        amount_big = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("amount-big"));
+        amount_big = ChatColor.translateAlternateColorCodes('&', prefix + msg.getString("amount-big"));
 
         enable = config.getBoolean("enabled");
 

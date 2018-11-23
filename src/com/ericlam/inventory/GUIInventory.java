@@ -51,14 +51,14 @@ public class GUIInventory {
     }
 
     private BuyItems getBuyItems(Player player, ItemStack itemStack){
-        for (BuyItems buyItems : playerItemsList.get(player.getUniqueId())){
+        for (BuyItems buyItems : playerItemsList.get(player.getUniqueId())) {
             if (buyItems.getItem().isSimilar(itemStack)) return buyItems;
         }
         return null;
     }
 
 
-    private void removeBuyItems(Player player, String nameId){
+    private void removeBuyItems(Player player, String nameId) {
         playerItemsList.get(player.getUniqueId()).removeIf(buyItems -> buyItems.getNameId().equals(nameId));
     }
 
@@ -72,10 +72,11 @@ public class GUIInventory {
         playerItems.put(player.getUniqueId(),items);
     }
 
-    public void setPlayerItemsList(Player player, ArrayList<BuyItems> items){
+    public void setPlayerItemsList(Player player, ArrayList<BuyItems> items) {
         if (items.size() == 0) return;
-        if (playerItemsList.containsKey(player.getUniqueId()) && items.size() == playerItemsList.get(player.getUniqueId()).size()) return;
-        playerItemsList.put(player.getUniqueId(),items);
+        if (playerItemsList.containsKey(player.getUniqueId()) && items.size() == playerItemsList.get(player.getUniqueId()).size())
+            return;
+        playerItemsList.put(player.getUniqueId(), items);
         changed.put(player.getUniqueId(),true);
     }
 
@@ -108,23 +109,24 @@ public class GUIInventory {
         this.previous = previous;
         this.next = next;
     }
-    private Inventory getNewRemoveInv(){
-        Inventory preRemoveInventory = Bukkit.createInventory(null,54,gui.getString("pre-remove-inventory.title").replace('&','§'));
-        preRemoveInventory.setItem(45,previous);
-        preRemoveInventory.setItem(53,next);
+
+    private Inventory getNewRemoveInv() {
+        Inventory preRemoveInventory = Bukkit.createInventory(null, 54, gui.getString("pre-remove-inventory.title").replace('&', '§'));
+        preRemoveInventory.setItem(45, previous);
+        preRemoveInventory.setItem(53, next);
         return preRemoveInventory;
     }
 
-    private Inventory getNewBuyInv(){
-        Inventory buyInventory = Bukkit.createInventory(null,54,gui.getString("buy-inventory.title").replace('&','§'));
-        buyInventory.setItem(45,previous);
-        buyInventory.setItem(53,next);
+    private Inventory getNewBuyInv() {
+        Inventory buyInventory = Bukkit.createInventory(null, 54, gui.getString("buy-inventory.title").replace('&', '§'));
+        buyInventory.setItem(45, previous);
+        buyInventory.setItem(53, next);
         return buyInventory;
     }
 
     public void makeGUI(Player player){
         if (!playerInv.containsKey(player.getUniqueId())){
-            playerInv.put(player.getUniqueId(),new Inventories(getNewBuyInv(),getNewRemoveInv()));
+            playerInv.put(player.getUniqueId(), new Inventories(getNewBuyInv(), getNewRemoveInv()));
         }
     }
 
@@ -151,7 +153,7 @@ public class GUIInventory {
 
     public void addRemoveItemsToGUI(Player player){
         if (!changed.get(player.getUniqueId())) return;
-        playerInv.put(player.getUniqueId(), new Inventories(getNewBuyInv(),getNewRemoveInv()));
+        playerInv.put(player.getUniqueId(), new Inventories(getNewBuyInv(), getNewRemoveInv()));
         ItemStack[] items = getRemoveItems(player);
         if (items == null || items.length == 0) return;
         List<Inventory> remove = takeGUI(player).getRemove();
@@ -170,7 +172,7 @@ public class GUIInventory {
 
     public void addBuyItemsToGUI(Player player){
         if (!changed.get(player.getUniqueId())) return;
-        playerInv.put(player.getUniqueId(), new Inventories(getNewBuyInv(),getNewRemoveInv()));
+        playerInv.put(player.getUniqueId(), new Inventories(getNewBuyInv(), getNewRemoveInv()));
         ArrayList<BuyItems> items = getBuyItemsMap(player);
         if (items == null || items.size() == 0) return;
         List<Inventory> buy = takeGUI(player).getBuy();
@@ -190,7 +192,7 @@ public class GUIInventory {
     }
 
     public boolean buyItem(ItemStack item, Player player,Inventory invbuy){
-        final BuyItems buy = getBuyItems(player,item);
+        final BuyItems buy = getBuyItems(player, item);
         if (buy == null) {
             return false;
         }
@@ -216,18 +218,18 @@ public class GUIInventory {
         }
 
         try(Connection connection = MySQLManager.getInstance().getConneciton();
-            PreparedStatement delete = connection.prepareStatement("DELETE FROM `"+Config.selltable+"` WHERE  `NameID`=? AND `Trader-PlayerName`=? AND `Trader-Server`=?");
-            PreparedStatement checker = connection.prepareStatement("SELECT `ItemStack` FROM `"+Config.selltable+"` WHERE `NameID`=? AND `Trader-PlayerName`=? AND `Trader-Server`=?")){
-            checker.setString(1,nameId);
+            PreparedStatement delete = connection.prepareStatement("DELETE FROM `" + Config.selltable + "` WHERE  `NameID`=? AND `Trader-PlayerName`=? AND `Trader-Server`=?");
+            PreparedStatement checker = connection.prepareStatement("SELECT `ItemStack` FROM `" + Config.selltable + "` WHERE `NameID`=? AND `Trader-PlayerName`=? AND `Trader-Server`=?")) {
+            checker.setString(1, nameId);
             checker.setString(2,player.getName());
             checker.setString(3,Config.server);
             ResultSet resultSet = checker.executeQuery();
             if (resultSet.next()) {
-                delete.setString(1,nameId);
+                delete.setString(1, nameId);
                 delete.setString(2, player.getName());
                 delete.setString(3, Config.server);
                 delete.execute();
-            }else {
+            } else {
                 player.sendMessage(Config.wait);
                 return false;
             }
@@ -236,7 +238,7 @@ public class GUIInventory {
             return false;
         }
 
-        if (ItemAunction.economy.withdrawPlayer(offlinePlayer,price).type != EconomyResponse.ResponseType.SUCCESS){
+        if (ItemAunction.economy.withdrawPlayer(offlinePlayer, price).type != EconomyResponse.ResponseType.SUCCESS) {
             player.sendMessage(Config.no_money);
             return false;
         }
@@ -245,7 +247,7 @@ public class GUIInventory {
         invbuy.removeItem(item);
 
         changed.put(player.getUniqueId(),true);
-        removeBuyItems(player,nameId);
+        removeBuyItems(player, nameId);
         return true;
     }
 
@@ -271,26 +273,26 @@ public class GUIInventory {
 
 
         try(Connection connection = MySQLManager.getInstance().getConneciton();
-            PreparedStatement delete = connection.prepareStatement("DELETE FROM `"+Config.pre_remove_table+"` WHERE (`Owner-PlayerName`=? OR `Owner-UUID`=?) AND `ItemStack`=? AND `Owner-Server`=?");
-            PreparedStatement checker = connection.prepareStatement("SELECT `ItemStack` FROM `"+Config.pre_remove_table+"` WHERE (`Owner-PlayerName`=? OR `Owner-UUID`=?) AND `ItemStack`=? AND `Owner-Server`=?")){
+            PreparedStatement delete = connection.prepareStatement("DELETE FROM `" + Config.pre_remove_table + "` WHERE (`Owner-PlayerName`=? OR `Owner-UUID`=?) AND `ItemStack`=? AND `Owner-Server`=?");
+            PreparedStatement checker = connection.prepareStatement("SELECT `ItemStack` FROM `" + Config.pre_remove_table + "` WHERE (`Owner-PlayerName`=? OR `Owner-UUID`=?) AND `ItemStack`=? AND `Owner-Server`=?")) {
             checker.setString(1,player.getName());
             checker.setString(2,player.getUniqueId().toString());
-            checker.setString(3,ItemStringConvert.itemStackToBase64(check));
+            checker.setString(3, ItemStringConvert.itemStackToBase64(check));
             checker.setString(4,Config.server);
 
-            delete.setString(1,player.getName());
-            delete.setString(2,player.getUniqueId().toString());
+            delete.setString(1, player.getName());
+            delete.setString(2, player.getUniqueId().toString());
 
             ResultSet resultSet = checker.executeQuery();
             int i = 0;
-            while (resultSet.next()){
+            while (resultSet.next()) {
                 if (checkInventoryFull(player)) {
                     player.sendMessage(Config.full_inv);
                     return false;
                 }
                 String sqlbase64 = resultSet.getString("ItemStack");
                 ItemStack itemStack = ItemStringConvert.itemStackFromBase64(sqlbase64);
-                delete.setString(3,sqlbase64);
+                delete.setString(3, sqlbase64);
                 delete.setString(4,Config.server);
                 delete.execute();
                 player.getInventory().addItem(itemStack);

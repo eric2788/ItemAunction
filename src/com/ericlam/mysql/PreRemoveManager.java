@@ -48,7 +48,7 @@ public class PreRemoveManager {
                 }
                 List<String> extralore = new ArrayList<>();
                 for (String s : Config.getInstance().getInventory().getStringList("pre-remove-inventory.extra-lore")) {
-                    extralore.add(ChatColor.translateAlternateColorCodes('&',s));
+                    extralore.add(ChatColor.translateAlternateColorCodes('&', s));
                 }
                 ItemStack clone = item.clone();
                 List<String> lore = item.getItemMeta().getLore();
@@ -60,7 +60,7 @@ public class PreRemoveManager {
                 }
                 items.add(clone);
             }
-             st = items.toArray(new ItemStack[0]);
+            st = items.toArray(new ItemStack[0]);
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -94,7 +94,7 @@ public class PreRemoveManager {
                                 LocalDate now = LocalDate.now();
                                 LocalDate first = new Timestamp(time).toLocalDateTime().toLocalDate();
                                 Period period = Period.between(first,now);
-                                if (period.getDays() >= config.getInt("remove-days")){
+                                if (period.getDays() >= config.getInt("remove-days")) {
                                     delete.execute();
                                 }
                             }

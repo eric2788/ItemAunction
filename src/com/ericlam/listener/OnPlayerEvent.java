@@ -7,11 +7,13 @@ import com.ericlam.mysql.MarketManager;
 import com.ericlam.mysql.PreRemoveManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.*;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -19,7 +21,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 
@@ -44,12 +45,10 @@ public class OnPlayerEvent implements Listener {
             gui.setPlayerItemsList(player,market.getTradeItems(player.getName()));
             gui.setPlayerItems(player,remove.getTradeItems(player.getName()));
             Bukkit.getScheduler().runTask(plugin,()->{
-                if (gui.getBuyItemsMap(player) == null) return;
-                if (gui.getBuyItemsMap(player).size() > 0){
+                if (gui.getBuyItemsMap(player) != null && gui.getBuyItemsMap(player).size() > 0) {
                     gui.addBuyItemsToGUI(player);
                 }
-                if (gui.getRemoveItems(player) == null) return;
-                if (gui.getRemoveItems(player).length > 0){
+                if (gui.getRemoveItems(player) != null && gui.getRemoveItems(player).length > 0) {
                     gui.addRemoveItemsToGUI(player);
                 }
             });
@@ -95,7 +94,7 @@ public class OnPlayerEvent implements Listener {
             }
             Bukkit.getScheduler().runTaskAsynchronously(plugin,()->{
                 boolean success = gui.buyItem(itemStack,player,inventory);
-                Bukkit.getScheduler().runTask(plugin,()->player.sendMessage(success ? Config.take_success : Config.take_fail));
+                player.sendMessage(success ? Config.take_success : Config.take_fail);
             });
         }
 
@@ -127,24 +126,8 @@ public class OnPlayerEvent implements Listener {
             }
             Bukkit.getScheduler().runTaskAsynchronously(plugin,()->{
                 boolean success = gui.removeItem(itemStack,player,inventory);
-                Bukkit.getScheduler().runTask(plugin,()->player.sendMessage(success ? Config.take_success : Config.take_fail));
+                player.sendMessage(success ? Config.take_success : Config.take_fail);
             });
-        }
-    }
-
-    @EventHandler
-    public void onDrag(InventoryDragEvent e){
-        if (!Config.enable) return;
-        if (!(e.getHandlers() instanceof Player)) return;
-        List<HumanEntity> players = e.getInventory().getViewers();
-        Inventory inventory = e.getInventory();
-        GUIInventory gui = GUIInventory.getInstance();
-        players.forEach(player ->player.sendMessage(player.getName()));
-        for (HumanEntity player : players) {
-            if (gui.takeGUI((Player)player).getBuy().contains(inventory) || gui.takeGUI((Player)player).getRemove().contains(inventory)){
-                e.setCancelled(true);
-                break;
-            }
         }
     }
 

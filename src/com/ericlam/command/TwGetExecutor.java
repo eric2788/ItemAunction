@@ -93,7 +93,7 @@ public class TwGetExecutor implements CommandExecutor {
 
                 Bukkit.getScheduler().runTaskAsynchronously(plugin,()->{
                     ItemStack item = marketManager.getBackItem(player,itemname);
-                    if (item == null || item.getType() == Material.AIR){
+                    if (item == null || item.getType() == Material.AIR) {
                         player.sendMessage(Config.no_exist);
                         player.sendMessage(Config.take_fail);
                         return;
@@ -141,7 +141,7 @@ public class TwGetExecutor implements CommandExecutor {
                 page++;
             }
             pages.get(page).add(Config.list_item
-                    .replace("<num>",i+1+"")
+                    .replace("<num>", i + 1 + "")
                     .replace("<item-id>",item)
                     .replace("<material>",stack.getType().toString())
                     .replace("<amount>",stack.getAmount()+"")

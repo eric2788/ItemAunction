@@ -11,3 +11,5 @@ commands:
     description: buy command
   twget:
     description: get command
+  twrm:
+    description: rm command
