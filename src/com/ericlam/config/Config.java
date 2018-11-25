@@ -43,7 +43,7 @@ public class Config {
     public static String no_this_page;
     public static String empty;
     public static String name_long;
-    public static String amount_big;
+    public static String remove_full;
 
     public static boolean enable;
 
@@ -93,7 +93,7 @@ public class Config {
         no_this_page = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("no-this-page"));
         empty = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("empty"));
         name_long = ChatColor.translateAlternateColorCodes('&',prefix+msg.getString("name-long"));
-        amount_big = ChatColor.translateAlternateColorCodes('&', prefix + msg.getString("amount-big"));
+        remove_full = ChatColor.translateAlternateColorCodes('&', prefix + msg.getString("remove-full"));
 
         enable = config.getBoolean("enabled");
 

@@ -293,7 +293,7 @@ public class GUIInventory {
             }
 
             if (checkInventoryFull(player, i)) {
-                player.sendMessage(Config.full_inv);
+                player.sendMessage(Config.remove_full);
                 return false;
             }
 

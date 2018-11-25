@@ -1,14 +1,14 @@
 item-material: ARROW
-item-previous: "&e previous page"
-item-next: "&e next page"
+item-previous: "&e上頁"
+item-next: "&e下頁"
 buy-inventory:
-  title: "buylist"
+  title: "訂購物品"
   extra-lore:
+  - "&7(<repeat>)"
     - "&7&l============="
     - "&e$<money>"
 pre-remove-inventory:
-  title: "removelist"
+  title: "下架物品"
   extra-lore:
-  - "Repeat: <repeat>"
     - "&7&l==============="
-    - "Click item to get back"
+    - "點擊以一次性拿回"
