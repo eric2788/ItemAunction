@@ -21,8 +21,7 @@ final class OpenConnect {
 
     Socket getSocket() {
         try {
-            Socket server = this.socket.accept();
-            return server;
+            return socket.accept();
         } catch (IOException e) {
             e.printStackTrace();
         }

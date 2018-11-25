@@ -13,5 +13,5 @@ commands:
     description: get command
   twrm:
     description: rm command
-  checkfull:
-    description: check inv
+  check:
+    description: check

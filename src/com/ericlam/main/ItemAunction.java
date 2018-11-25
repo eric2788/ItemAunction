@@ -5,7 +5,6 @@ import com.ericlam.command.TwGetExecutor;
 import com.ericlam.command.TwSellExecutor;
 import com.ericlam.config.Config;
 import com.ericlam.converter.ItemStringConvert;
-import com.ericlam.inventory.GUIInventory;
 import com.ericlam.listener.OnPlayerEvent;
 import com.ericlam.mysql.MarketManager;
 import com.ericlam.mysql.MySQLManager;
@@ -127,6 +126,7 @@ public class ItemAunction extends JavaPlugin {
         if (sender instanceof ConsoleCommandSender) return false;
         Player player = (Player) sender;
         if (command.getName().equalsIgnoreCase("twrm")) {
+            if (!player.hasPermission("tw.admin")) return false;
             ItemStack item = player.getInventory().getItemInMainHand();
             if (item.getType() == Material.AIR) {
                 player.sendMessage(Config.air);
@@ -137,11 +137,6 @@ public class ItemAunction extends JavaPlugin {
                 player.sendMessage(success ? Config.upload_success : Config.upload_fail);
                 if (success) player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
             });
-        }
-
-        if (command.getName().equalsIgnoreCase("checkfull")) {
-            GUIInventory gui = GUIInventory.getInstance();
-            player.sendMessage(gui.checkInventoryFull(player) + "");
         }
         return true;
     }
