@@ -254,14 +254,12 @@ public class GUIInventory {
     }
 
     private void restoreLore(List<String> lore, int extralength, int lorelength, ItemStack check) {
-        Bukkit.getScheduler().runTask(plugin,()->{
             int i = lorelength-1;
             while (i > lorelength - extralength -1){
                 lore.remove(i);
                 i--;
             }
             check.setLore(lore);
-        });
     }
 
     public boolean removeItem(ItemStack item,Player player,Inventory invremove){
@@ -286,25 +284,36 @@ public class GUIInventory {
             delete.setString(2, player.getUniqueId().toString());
 
             ResultSet resultSet = checker.executeQuery();
+
+            String sqlbase64 = "";
             int i = 0;
             while (resultSet.next()) {
-                if (checkInventoryFull(player)) {
-                    player.sendMessage(Config.full_inv);
-                    return false;
-                }
-                String sqlbase64 = resultSet.getString("ItemStack");
-                ItemStack itemStack = ItemStringConvert.itemStackFromBase64(sqlbase64);
-                delete.setString(3, sqlbase64);
-                delete.setString(4,Config.server);
-                delete.execute();
-                player.getInventory().addItem(itemStack);
-                invremove.removeItem(item);
+                sqlbase64 = resultSet.getString("ItemStack");
                 i++;
             }
+
+            if (checkInventoryFull(player, i)) {
+                player.sendMessage(Config.full_inv);
+                return false;
+            }
+
             if (i == 0) {
                 player.sendMessage(Config.wait);
                 return false;
+            } else {
+                if (sqlbase64.isEmpty()) return false;
+                delete.setString(3, sqlbase64);
+                delete.setString(4, Config.server);
+                delete.execute();
             }
+
+            for (int i1 = 0; i1 < i; i1++) {
+                ItemStack itemStack = ItemStringConvert.itemStackFromBase64(sqlbase64);
+                player.getInventory().addItem(itemStack);
+                invremove.removeItem(item);
+            }
+
+
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -316,11 +325,21 @@ public class GUIInventory {
     }
 
     public boolean checkInventoryFull(Player player){
-        ItemStack[] stacks = player.getInventory().getContents();
+        ItemStack[] stacks = player.getInventory().getStorageContents();
         if (stacks == null || stacks.length == 0) return false;
         for (ItemStack stack : stacks) {
             if (stack == null || stack.getType() == Material.AIR) return false;
         }
         return true;
+    }
+
+    private boolean checkInventoryFull(Player player, int slots) {
+        ItemStack[] stacks = player.getInventory().getStorageContents();
+        if (stacks == null || stacks.length == 0) return false;
+        int i = 0;
+        for (ItemStack stack : stacks) {
+            if (stack == null || stack.getType() == Material.AIR) i++;
+        }
+        return i < slots;
     }
 }
