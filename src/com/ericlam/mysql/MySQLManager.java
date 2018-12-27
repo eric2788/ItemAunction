@@ -8,8 +8,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class MySQLManager {
     private static DataSource source;
@@ -27,8 +25,6 @@ public class MySQLManager {
 
         //Create dat fucking config
         HikariConfig config = new HikariConfig();
-        Logger logger = Logger.getLogger("com.zaxxer.hikari");
-        logger.setLevel(Level.ALL);
         String host = sqlConfig.getString("MySQL.host");
         String port = sqlConfig.getString("MySQL.port");
         String database = sqlConfig.getString("MySQL.database");
