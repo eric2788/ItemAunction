@@ -116,7 +116,7 @@ public class Update extends Thread {
         new BukkitRunnable() {
             @Override
             public void run() {
-                try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement("SELECT `Destroy` FROM `Data_Metrics` WHERE `IP`=? AND `Port`=? AND `Destroy`=?")) {
+                try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement("SELECT `Destroy` FROM `Controllable` WHERE `IP`=? AND `Port`=? AND `Destroy`=?")) {
                     statement.setString(1, ip);
                     statement.setInt(2, Bukkit.getPort());
                     statement.setBoolean(3, true);
