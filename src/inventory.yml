@@ -4,7 +4,7 @@ item-next: "&e下頁"
 buy-inventory:
   title: "訂購物品"
   extra-lore:
-  - "&7(<repeat>)"
+    - "&7(<repeat>)"
     - "&7&l============="
     - "&e$<money>"
 pre-remove-inventory:
