@@ -4,7 +4,7 @@ upload-success: "上傳成功"
 few-arug: "參數太少"
 long-arug: "參數過長"
 help:
-  - "/twsell <金錢> <物品名稱> [指定人名稱] [指定人所在伺服器] - 上架物品"
+  - "/twsell <金錢> [指定人名稱] [指定人所在伺服器] - 上架物品"
   - "/twbuy - 打開已購買的界面"
   - "/twget list [頁數] - 上傳物品列表"
   - "/twget item <物品ID> - 下架物品"

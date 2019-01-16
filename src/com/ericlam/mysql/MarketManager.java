@@ -89,8 +89,15 @@ public class MarketManager {
         }
     }
 
-    public boolean uploadItem(ItemStack item, Player player, int price, String nameid) throws MoneyPriceException {
-        if (hasItem(nameid)) return false;
+    public String genRandomUUID() {
+        String uuid;
+        while (true) {
+            uuid = UUID.randomUUID().toString();
+            if (!hasItem(uuid)) return uuid;
+        }
+    }
+
+    public synchronized boolean uploadItem(ItemStack item, Player player, int price, String nameid) throws MoneyPriceException {
         oldPriceChecking(item, player, price);
         String base64 = ItemStringConvert.itemStackToBase64(item);
         int amount = item.getAmount();

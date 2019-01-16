@@ -37,7 +37,7 @@ public class TwSellExecutor implements CommandExecutor {
         Player player = (Player) commandSender;
         FileConfiguration config = Config.getInstance().getConfig();
 
-        if (strings.length < 2){
+        if (strings.length < 1) {
             commandSender.sendMessage(Config.few_arug);
             commandSender.sendMessage(Config.help);
             return false;
@@ -57,31 +57,23 @@ public class TwSellExecutor implements CommandExecutor {
             player.sendMessage(Config.max_number);
             return false;
         }
-        String itemname = strings[1];
-
-        if (itemname.length() > 255){
-            player.sendMessage(Config.name_long);
-            return false;
-        }
 
         ItemStack item = player.getInventory().getItemInMainHand();
         MarketManager market = MarketManager.getInstance();
+
+        String itemname = market.genRandomUUID();
 
         if (item.getType() == Material.AIR){
             player.sendMessage(Config.air);
             return false;
         }
 
-        if (strings.length == 2){
+        if (strings.length == 1) {
             Bukkit.getScheduler().runTaskAsynchronously(plugin,()->{
                 try {
-                    if (!market.hasItem(itemname)) {
-                        boolean success = market.uploadItem(item, player, money, itemname);
+                    boolean success = market.uploadItem(item, player, money, itemname);
                         player.sendMessage(success ? Config.upload_success : Config.upload_fail);
                         if (success) player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
-                    } else {
-                        player.sendMessage(Config.exist);
-                    }
                 }catch (MoneyPriceException e){
                     player.sendMessage(Config.money_not_same.replace("<price>", e.getMessage()));
                 }
@@ -90,18 +82,18 @@ public class TwSellExecutor implements CommandExecutor {
             return true;
         }
 
-        if (strings.length == 3){
+        if (strings.length == 2) {
             player.sendMessage(Config.help);
             return false;
         }
 
-        if (strings.length > 4){
+        if (strings.length > 3) {
             player.sendMessage(Config.long_arug);
             return false;
         }
 
-        String name = strings[2];
-        String server = strings[3];
+        String name = strings[1];
+        String server = strings[2];
         Bukkit.getScheduler().runTaskAsynchronously(plugin,()->{
             try {
                 if (!market.hasItem(itemname)) {
